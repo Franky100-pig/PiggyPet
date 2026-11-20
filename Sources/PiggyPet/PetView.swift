@@ -2,6 +2,9 @@ import AppKit
 
 @MainActor
 final class PetView: NSView {
+    weak var stateMachine: PetStateMachine?
+    weak var menuBuilder: MenuBuilder?
+
     private(set) var currentSprite: Sprite = AssetCatalog.shared.sleepSprite
     private var spriteImage: NSImage = AssetCatalog.shared.image(for: AssetCatalog.shared.sleepSprite)
     private var alphaRep: NSBitmapImageRep?
@@ -120,6 +123,7 @@ final class PetView: NSView {
         downPoint = NSEvent.mouseLocation
         originAtDown = window?.frame.origin ?? .zero
         didDrag = false
+        stateMachine?.beginPointerInteraction()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -136,5 +140,10 @@ final class PetView: NSView {
         if didDrag, let window {
             Preferences.saveOrigin(window.frame.origin)
         }
+        stateMachine?.endPointerInteraction(wasTap: !didDrag)
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        menuBuilder?.show(at: event.locationInWindow, in: self)
     }
 }
