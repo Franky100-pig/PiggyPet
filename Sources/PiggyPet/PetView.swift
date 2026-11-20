@@ -92,5 +92,21 @@ final class PetView: NSView {
         (text as NSString).draw(in: bubbleRect.insetBy(dx: 8, dy: 6), withAttributes: attributes)
     }
 
+    // MARK: - Pixel-accurate hit testing
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard super.hitTest(point) != nil else { return nil }
+        if bubbleText != nil && bubbleRect.contains(point) { return self }
+
+        let rect = spriteRect
+        guard rect.contains(point), let rep = alphaRep else { return nil }
+        let x = Int((point.x - rect.minX) * CGFloat(rep.pixelsWide) / rect.width)
+        let y = Int((point.y - rect.minY) * CGFloat(rep.pixelsHigh) / rect.height)
+        guard x >= 0, x < rep.pixelsWide, y >= 0, y < rep.pixelsHigh else { return nil }
+
+        guard let color = rep.colorAt(x: x, y: y) else { return self }
+        return color.alphaComponent > 0.15 ? self : nil
+    }
+
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
