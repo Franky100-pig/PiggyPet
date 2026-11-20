@@ -109,4 +109,32 @@ final class PetView: NSView {
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    // MARK: - Mouse interaction
+
+    private var downPoint: NSPoint = .zero
+    private var originAtDown: NSPoint = .zero
+    private var didDrag = false
+
+    override func mouseDown(with event: NSEvent) {
+        downPoint = NSEvent.mouseLocation
+        originAtDown = window?.frame.origin ?? .zero
+        didDrag = false
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        let current = NSEvent.mouseLocation
+        let dx = current.x - downPoint.x
+        let dy = current.y - downPoint.y
+        if hypot(dx, dy) > 4 { didDrag = true }
+        guard didDrag, let window else { return }
+        let origin = NSPoint(x: originAtDown.x + dx, y: originAtDown.y + dy)
+        window.setFrameOrigin(Geometry.clampWindowOrigin(origin, size: window.frame.size))
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        if didDrag, let window {
+            Preferences.saveOrigin(window.frame.origin)
+        }
+    }
 }

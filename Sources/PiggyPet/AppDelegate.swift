@@ -5,10 +5,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: PetWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let size = NSSize(width: 200, height: 220)
-        // visibleFrame excludes the Dock and menu bar, so this sits just above the Dock.
-        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
-        let origin = NSPoint(x: screen.minX + 8, y: screen.minY + 8)
+        Preferences.register()
+        let size = NSSize(width: 200, height: 240)
+        let origin: NSPoint
+        if let saved = Preferences.savedOrigin {
+            origin = Geometry.clampWindowOrigin(saved, size: size)
+        } else {
+            origin = Geometry.bottomLeftOrigin(for: size)
+        }
         let panel = PetWindow(contentRect: NSRect(origin: origin, size: size))
         let view = PetView(frame: NSRect(origin: .zero, size: size))
         panel.contentView = view
