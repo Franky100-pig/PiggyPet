@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "spriteSize": 160,
+  "sleepId": "sleep",
+  "sprites": [
+    {
+      "id": "pig_0001",
+      "kind": "image",
+      "file": "sprites/0001.png",
+      "original": "七哼图.jpg",
+      "mood": "angry",
+      "bubble": "再碰我试试"
+    },
+    {
+      "id": "pig_0002",
+      "kind": "image",
+      "file": "sprites/0002.png",
+      "original": "两猪对哼.jpg",
+      "mood": "angry",
+      "bubble": "猪猪生气了"
+    },
+    {
+      "id": "pig_0003",
+      "kind": "image",
+      "file": "sprites/0003.png",
+      "original": "为猪着迷.png",
+      "mood": "neutral",
+      "bubble": "嗯？"
+    },
+    {
+      "id": "pig_0005",
+      "kind": "image",
+      "file": "sprites/0005.png",
+      "original": "可爱猪翻身.gif",
+      "mood": "happy",
+      "bubble": "好耶！"
+    },
+    {
+      "id": "pig_0007",
+      "kind": "image",
+      "file": "sprites/0007.png",
+      "original": "在群友身上睡觉.jpg",
+      "mood": "sleep",
+      "bubble": "Zzz…"
+    },
+    {
+      "id": "pig_0008",
+      "kind": "image",
+      "file": "sprites/0008.png",
+      "original": "外星猪睡觉.jpg",
+      "mood": "sleep",
+      "bubble": "别吵，在睡觉"
+    },
+    {
+      "id": "pig_0009",
+      "kind": "image",
+      "file": "sprites/0009.png",
+      "original": "小型大猪圈.png",
+      "mood": "neutral",
+      "bubble": "嗯？"
+    },
+    {
+      "id": "pig_0011",
+      "kind": "image",
+      "file": "sprites/0011.png",
+      "original": "我以后天天笑.jpg",
+      "mood": "happy",
+      "bubble": "好耶！"
+    },
+    {
+      "id": "pig_0013",
+      "kind": "image",
+      "file": "sprites/0013.png",
+      "original": "我再也不会笑了.jpg",
+      "mood": "happy",
+      "bubble": "猪咪开心"
+    },
+    {
+      "id": "pig_0016",
+      "kind": "image",
+      "file": "sprites/0016.png",
+      "original": "猪不乐.png",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    },
+    {
+      "id": "pig_0017",
+      "kind": "image",
+      "file": "sprites/0017.png",
+      "original": "猪伤心哼！猪.png",
+      "mood": "angry",
+      "bubble": "猪猪生气了"
+    },
+    {
+      "id": "pig_0020",
+      "kind": "image",
+      "file": "sprites/0020.png",
+      "original": "猪反转.jpg",
+      "mood": "neutral",
+      "bubble": "你叫我？"
+    },
+    {
+      "id": "pig_0021",
+      "kind": "image",
+      "file": "sprites/0021.png",
+      "original": "猪可爱.jpg",
+      "mood": "happy",
+      "bubble": "嘿嘿"
+    },
+    {
+      "id": "pig_0022",
+      "kind": "image",
+      "file": "sprites/0022.png",
+      "original": "猪吃炸鸡.jpg",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    },
+    {
+      "id": "pig_0024",
+      "kind": "image",
+      "file": "sprites/0024.png",
+      "original": "猪喝咖啡.png",
+      "mood": "neutral",
+      "bubble": "嗯？"
+    },
+    {
+      "id": "pig_0027",
+      "kind": "image",
+      "file": "sprites/0027.png",
+      "original": "猪开心.jpg",
+      "mood": "happy",
+      "bubble": "嘿嘿"
+    },
+    {
+      "id": "pig_0028",
+      "kind": "image",
+      "file": "sprites/0028.png",
+      "original": "猪思考.jpg",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    },
+    {
+      "id": "pig_0029",
+      "kind": "image",
+      "file": "sprites/0029.png",
+      "original": "猪愤怒.jpg",
+      "mood": "angry",
+      "bubble": "猪猪生气了"
+    },
+    {
+      "id": "pig_0035",
+      "kind": "image",
+      "file": "sprites/0035.png",
+      "original": "猪眠气.png",
+      "mood": "neutral",
+      "bubble": "你叫我？"
+    },
+    {
+      "id": "pig_0036",
+      "kind": "image",
+      "file": "sprites/0036.png",
+      "original": "猪睡觉.jpg",
+      "mood": "sleep",
+      "bubble": "呼…呼…"
+    },
+    {
+      "id": "pig_0037",
+      "kind": "image",
+      "file": "sprites/0037.png",
+      "original": "猪睡觉_2.png",
+      "mood": "sleep",
+      "bubble": "Zzz…"
+    },
+    {
+      "id": "pig_0038",
+      "kind": "image",
+      "file": "sprites/0038.png",
+      "original": "猪笑死.jpg",
+      "mood": "happy",
+      "bubble": "好耶！"
+    },
+    {
+      "id": "pig_0039",
+      "kind": "image",
+      "file": "sprites/0039.png",
+      "original": "猪许愿.jpg",
+      "mood": "neutral",
+      "bubble": "嗯？"
+    },
+    {
+      "id": "pig_0040",
+      "kind": "image",
+      "file": "sprites/0040.png",
+      "original": "猪起床.jpg",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    },
+    {
+      "id": "pig_0041",
+      "kind": "image",
+      "file": "sprites/0041.png",
+      "original": "猪趴鱼 摸鱼（🐟🐷）.png",
+      "mood": "neutral",
+      "bubble": "你叫我？"
+    },
+    {
+      "id": "pig_0044",
+      "kind": "image",
+      "file": "sprites/0044.png",
+      "original": "猪饺.png",
+      "mood": "neutral",
+      "bubble": "你叫我？"
+    },
+    {
+      "id": "pig_0045",
+      "kind": "image",
+      "file": "sprites/0045.png",
+      "original": "睡觉猪（叠叠乐）.jpg",
+      "mood": "sleep",
+      "bubble": "呼…呼…"
+    },
+    {
+      "id": "pig_0047",
+      "kind": "image",
+      "file": "sprites/0047.png",
+      "original": "装听不见(笑).png",
+      "mood": "happy",
+      "bubble": "好耶！"
+    },
+    {
+      "id": "sleep",
+      "kind": "image",
+      "file": "sprites/sleep.png",
+      "original": "user-provided 猪睡觉 meme (caption and template corners removed)",
+      "mood": "sleep",
+      "bubble": "呼…呼…"
+    },
+    {
+      "id": "text_01",
+      "kind": "text",
+      "text": "猪猪不开心",
+      "mood": "angry",
+      "bubble": "再碰我试试"
+    },
+    {
+      "id": "text_02",
+      "kind": "text",
+      "text": "摸鱼中…",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    },
+    {
+      "id": "text_03",
+      "kind": "text",
+      "text": "哼哼哼",
+      "mood": "angry",
+      "bubble": "再碰我试试"
+    },
+    {
+      "id": "text_04",
+      "kind": "text",
+      "text": "Zzz…",
+      "mood": "sleep",
+      "bubble": "Zzz…"
+    },
+    {
+      "id": "text_05",
+      "kind": "text",
+      "text": "别管我",
+      "mood": "neutral",
+      "bubble": "摸鱼中…"
+    }
+  ]
+}
