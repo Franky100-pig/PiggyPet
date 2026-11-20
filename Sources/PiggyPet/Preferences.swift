@@ -14,7 +14,7 @@ enum Preferences {
     }
 
     private static let defaults: [String: Any] = [
-        Key.tantrumEnabled: true,
+        Key.tantrumEnabled: false,
         Key.bubbleEnabled: true,
         Key.tantrumIntervalMin: 300.0,
         Key.tantrumIntervalMax: 600.0,

@@ -117,12 +117,19 @@ final class PetView: NSView {
 
     private var downPoint: NSPoint = .zero
     private var originAtDown: NSPoint = .zero
-    private var didDrag = false
+    private var didMoveWindow = false
+
+    /// The window follows the cursor only beyond this dead zone, so a few
+    /// points of hand jitter while clicking never nudges the pet.
+    private let dragDeadZone: CGFloat = 8
+    /// At mouseUp the NET displacement (down point -> release point) decides
+    /// tap vs drag. This tolerates wobble that returns near the start.
+    private let tapMaxNetDisplacement: CGFloat = 10
 
     override func mouseDown(with event: NSEvent) {
         downPoint = NSEvent.mouseLocation
         originAtDown = window?.frame.origin ?? .zero
-        didDrag = false
+        didMoveWindow = false
         stateMachine?.beginPointerInteraction()
     }
 
@@ -130,17 +137,25 @@ final class PetView: NSView {
         let current = NSEvent.mouseLocation
         let dx = current.x - downPoint.x
         let dy = current.y - downPoint.y
-        if hypot(dx, dy) > 4 { didDrag = true }
-        guard didDrag, let window else { return }
+        if hypot(dx, dy) > dragDeadZone { didMoveWindow = true }
+        guard didMoveWindow, let window else { return }
         let origin = NSPoint(x: originAtDown.x + dx, y: originAtDown.y + dy)
         window.setFrameOrigin(Geometry.clampWindowOrigin(origin, size: window.frame.size))
     }
 
     override func mouseUp(with event: NSEvent) {
-        if didDrag, let window {
+        let release = NSEvent.mouseLocation
+        let net = hypot(release.x - downPoint.x, release.y - downPoint.y)
+        let wasTap = net <= tapMaxNetDisplacement
+
+        if wasTap {
+            // A jittery tap may have moved the window past the dead zone; put
+            // it back so the pet never visibly jumps and position stays stable.
+            if didMoveWindow { window?.setFrameOrigin(originAtDown) }
+        } else if didMoveWindow, let window {
             Preferences.saveOrigin(window.frame.origin)
         }
-        stateMachine?.endPointerInteraction(wasTap: !didDrag)
+        stateMachine?.endPointerInteraction(wasTap: wasTap)
     }
 
     override func rightMouseDown(with event: NSEvent) {
