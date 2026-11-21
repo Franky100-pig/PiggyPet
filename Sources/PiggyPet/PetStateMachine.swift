@@ -192,7 +192,14 @@ final class PetStateMachine {
         }
     }
 
-    /// Builds the waypoints of a stroll: out, across, back, home.
+    /// Builds a four-leg stroll with three turns:
+    ///   1. trot out along the lower lane
+    ///   2. angle up-and-back onto a parallel lane
+    ///   3. walk home along that *different* lane
+    ///   4. angle down-and-back onto the starting spot
+    /// The outbound and return legs run at clearly different heights, so the
+    /// pig never retraces the same line. Both connectors are diagonal (real
+    /// horizontal travel), never a pure vertical elevator ride.
     private func strollRoute(from home: NSPoint, size: NSSize) -> [NSPoint] {
         let frame = NSScreen.main?.visibleFrame
             ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
@@ -205,25 +212,24 @@ final class PetStateMachine {
             Geometry.clampWindowOrigin(p, size: size)
         }
 
-        // Prefer the direction with more room so the walk can be long.
-        let roomRight = maxX - home.x
-        let roomLeft = home.x - minX
-        let direction: CGFloat = roomRight >= roomLeft ? 1 : -1
-        let room = max(roomRight, roomLeft)
+        // Horizontal direction with the most room so the walk can be long.
+        let dir: CGFloat = (maxX - home.x) >= (home.x - minX) ? 1 : -1
+        let room = max(maxX - home.x, home.x - minX)
+        let out = min(CGFloat.random(in: 280...420), room * 0.85)
+        let connector = max(90, out * CGFloat.random(in: 0.33...0.45))
 
-        let out = min(CGFloat.random(in: 260...420), room * 0.85)
-        // Vertical drift stays tiny (14–24 pt) and is spread across a long
-        // horizontal leg, so the pig reads as walking flat instead of sliding
-        // up or down like an elevator. No dedicated vertical segment.
-        let rise = min(CGFloat.random(in: 14...24), max(0, maxY - home.y))
-        let farX = home.x + out * direction
+        // Put the parallel lane on whichever side (up/down) has more space.
+        let vdir: CGFloat = (maxY - home.y) >= (home.y - minY) ? 1 : -1
+        let availableVertical = vdir > 0 ? (maxY - home.y) : (home.y - minY)
+        let laneHeight = min(CGFloat.random(in: 55...85), availableVertical)
 
-        let outPoint = fit(NSPoint(x: farX, y: home.y + rise))
-        // Come back on a slightly lower line than the outbound one, so the
-        // two legs don't sit on exactly the same path.
-        let midX = home.x + out * 0.5 * direction
-        let backPoint = fit(NSPoint(x: midX, y: home.y + rise * 0.15))
-        return [outPoint, backPoint, home]
+        let lowerY = home.y
+        let upperY = home.y + laneHeight * vdir
+        let farX = home.x + out * dir
+        let p1 = fit(NSPoint(x: farX, y: lowerY))                       // out, lower lane
+        let p2 = fit(NSPoint(x: farX - connector * dir, y: upperY))     // diagonal up + back
+        let p3 = fit(NSPoint(x: home.x + connector * dir, y: upperY))   // back, other lane
+        return [p1, p2, p3, home]                                       // diagonal down + back
     }
 
     /// Walks a list of waypoints in order, honouring pointer interruption.
