@@ -12,7 +12,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Sleep state with a breathing Zzz, tap-to-switch (image or text), drag-to-move, position memory
 - Launch at login, enabled on first run and switchable any time from the menu
 - App icon generated from the source artwork by `scripts/make_icon.py`
-- 关于 PiggyPet in the menu shows the version and links to the project page
+- First launch shows a one-time hint, and 关于 PiggyPet in the menu shows the version and links to the project page
 - Re-clamps itself when the display layout changes, so unplugging a monitor never strands it off-screen
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
 - Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own

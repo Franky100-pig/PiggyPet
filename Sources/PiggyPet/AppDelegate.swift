@@ -8,9 +8,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let menuBuilder = MenuBuilder()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let debugEnabled = ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug")
+
+        // Two pigs would fight over the same saved position, so a second copy
+        // steps aside instead of appearing next to the first one. Debug builds
+        // skip this, so a test instance can run beside the installed app.
+        if !debugEnabled, anotherInstance != nil {
+            NSLog("[PiggyPet] already running, quitting this copy")
+            NSApp.terminate(nil)
+            return
+        }
+
         Preferences.register()
 
         let size = NSSize(width: 200, height: 240)
+        let isFirstRun = Preferences.savedOrigin == nil
         let origin: NSPoint
         if let saved = Preferences.savedOrigin {
             origin = Geometry.clampWindowOrigin(saved, size: size)
@@ -34,6 +47,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window = panel
         stateMachine.start()
 
+        // A fresh install gives no clue that the pig has a menu, or that it can
+        // be clicked at all: say it once, then never again.
+        if isFirstRun, !Preferences.hintShown {
+            Preferences.setHintShown(true)
+            stateMachine.flashBubble("点我换表情，右键设置")
+        }
+
         // Unplugging a display (or mirroring) can strand the pig outside the
         // new desktop. Pull it back as soon as the screens change instead of
         // waiting for the next launch.
@@ -44,8 +64,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
-        let debugEnabled = ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
-            || ProcessInfo.processInfo.arguments.contains("--debug")
         if debugEnabled {
             // Also mirror NSLog to a file: handy when the app is started with
             // `open` and the unified log is awkward to query.
@@ -72,6 +90,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 stateMachine.flashBubble("请在系统设置里允许开机自启")
             }
         }
+    }
+
+    /// Another copy of this bundle already running, if any.
+    private var anotherInstance: NSRunningApplication? {
+        guard let id = Bundle.main.bundleIdentifier else { return nil }
+        let me = ProcessInfo.processInfo.processIdentifier
+        return NSRunningApplication.runningApplications(withBundleIdentifier: id)
+            .first { $0.processIdentifier != me && !$0.isTerminated }
     }
 
     @objc private func screensChanged() {

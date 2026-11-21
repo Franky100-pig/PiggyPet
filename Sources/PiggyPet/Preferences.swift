@@ -82,6 +82,7 @@ enum Preferences {
         static let nudgeFrequency = "nudgeFrequency"
         static let walkPace = "walkPace"
         static let loginItemAsked = "loginItemAsked"
+        static let hintShown = "hintShown"
     }
 
     private static let defaults: [String: Any] = [
@@ -93,6 +94,7 @@ enum Preferences {
         Key.nudgeFrequency: NudgeFrequency.occasionally.rawValue,
         Key.walkPace: WalkPace.normal.rawValue,
         Key.loginItemAsked: false,
+        Key.hintShown: false,
     ]
 
     static func register() {
@@ -175,5 +177,15 @@ enum Preferences {
 
     static func setLoginItemAsked(_ value: Bool) {
         UserDefaults.standard.set(value, forKey: Key.loginItemAsked)
+    }
+
+    /// Whether the one-time "right-click me" hint has been shown. Only a truly
+    /// fresh install gets it; upgrading users already know the menu is there.
+    static var hintShown: Bool {
+        UserDefaults.standard.bool(forKey: Key.hintShown)
+    }
+
+    static func setHintShown(_ value: Bool) {
+        UserDefaults.standard.set(value, forKey: Key.hintShown)
     }
 }

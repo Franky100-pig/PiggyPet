@@ -8,6 +8,8 @@ menu layout — only the rough edges found while re-reading the 1.0.0 sources.
 - **The Zzz breathes again.** The sleep pulse was a one-shot timer, so the Zzz dimmed once about a second after the pig fell asleep and then stayed dim for the whole nap. It now alternates slowly while the pig sleeps and stops the moment it wakes.
 - **The pig comes back when displays change.** Unplugging an external monitor (or rearranging screens) could leave it parked outside the new desktop until the next launch. It now re-clamps itself as soon as the screen layout changes, and saves the corrected spot.
 - **About PiggyPet.** New entry at the bottom of the right-click menu: version, build number, a one-line reminder of the controls, and a button to open the project page. Until now there was no way to see which version was running.
+- **First run says hello.** A fresh install gets one speech bubble — 「点我换表情，右键设置」 — because nothing on screen suggests the pig has a menu or can be clicked at all. It is shown once and never again; upgrading users already know and do not see it.
+- **One pig only.** Launching a second copy (double-clicking another unzipped copy, `open -n`) no longer puts two pigs on screen fighting over the same saved position: the newcomer quits immediately.
 - Finder's Get Info now has a category and a copyright line for the bundle.
 - The install steps below were still telling people to download `0.4.2`.
 
