@@ -70,6 +70,22 @@ final class MenuBuilder: NSObject {
         excitementItem.submenu = excitementMenu
         menu.addItem(excitementItem)
 
+        let paceItem = NSMenuItem(title: "走路速度", action: nil, keyEquivalent: "")
+        let paceMenu = NSMenu()
+        for pace in WalkPace.allCases {
+            let paceEntry = NSMenuItem(
+                title: pace.title,
+                action: #selector(setWalkPace(_:)),
+                keyEquivalent: ""
+            )
+            paceEntry.target = self
+            paceEntry.representedObject = pace
+            paceEntry.state = pace == Preferences.walkPace ? .on : .off
+            paceMenu.addItem(paceEntry)
+        }
+        paceItem.submenu = paceMenu
+        menu.addItem(paceItem)
+
         let resetItem = NSMenuItem(title: "回到左下角", action: #selector(resetPosition), keyEquivalent: "")
         resetItem.target = self
         menu.addItem(resetItem)
@@ -120,6 +136,11 @@ final class MenuBuilder: NSObject {
     @objc private func setNudgeFrequency(_ sender: NSMenuItem) {
         guard let freq = sender.representedObject as? NudgeFrequency else { return }
         Preferences.setNudgeFrequency(freq)
+    }
+
+    @objc private func setWalkPace(_ sender: NSMenuItem) {
+        guard let pace = sender.representedObject as? WalkPace else { return }
+        Preferences.setWalkPace(pace)
     }
 
     @objc private func resetPosition() {

@@ -44,6 +44,29 @@ enum NudgeFrequency: String, CaseIterable {
     }
 }
 
+/// How fast the pig ambles around on its own. Chasing the cursor always uses
+/// the fast running art, independent of this setting.
+enum WalkPace: String, CaseIterable {
+    case slow, normal, fast
+
+    var title: String {
+        switch self {
+        case .slow: return "慢悠悠"
+        case .normal: return "正常"
+        case .fast: return "利索"
+        }
+    }
+
+    /// Points per second while strolling.
+    var pointsPerSecond: CGFloat {
+        switch self {
+        case .slow: return 48
+        case .normal: return 80
+        case .fast: return 120
+        }
+    }
+}
+
 /// Thin UserDefaults wrapper. Values are read at use time so `defaults write`
 /// from a terminal can tweak behavior after a relaunch.
 @MainActor
@@ -57,6 +80,7 @@ enum Preferences {
         static let tantrumIntervalMax = "tantrumIntervalMax"
         static let excitement = "excitementLevel"
         static let nudgeFrequency = "nudgeFrequency"
+        static let walkPace = "walkPace"
     }
 
     private static let defaults: [String: Any] = [
@@ -66,6 +90,7 @@ enum Preferences {
         Key.tantrumIntervalMax: 180.0,
         Key.excitement: Excitement.medium.rawValue,
         Key.nudgeFrequency: NudgeFrequency.occasionally.rawValue,
+        Key.walkPace: WalkPace.normal.rawValue,
     ]
 
     static func register() {
@@ -129,5 +154,14 @@ enum Preferences {
 
     static func setNudgeFrequency(_ value: NudgeFrequency) {
         UserDefaults.standard.set(value.rawValue, forKey: Key.nudgeFrequency)
+    }
+
+    static var walkPace: WalkPace {
+        let raw = UserDefaults.standard.string(forKey: Key.walkPace) ?? ""
+        return WalkPace(rawValue: raw) ?? .normal
+    }
+
+    static func setWalkPace(_ value: WalkPace) {
+        UserDefaults.standard.set(value.rawValue, forKey: Key.walkPace)
     }
 }
