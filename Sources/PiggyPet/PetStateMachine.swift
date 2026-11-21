@@ -192,14 +192,13 @@ final class PetStateMachine {
         }
     }
 
-    /// Builds a four-leg stroll with three turns:
-    ///   1. trot out along the lower lane
-    ///   2. angle up-and-back onto a parallel lane
-    ///   3. walk home along that *different* lane
-    ///   4. angle down-and-back onto the starting spot
-    /// The outbound and return legs run at clearly different heights, so the
-    /// pig never retraces the same line. Both connectors are diagonal (real
-    /// horizontal travel), never a pure vertical elevator ride.
+    /// Builds a random zig-zag walk. Turn count, span and lane heights are
+    /// re-rolled every time, so no two strolls follow the same path. Two hard
+    /// rules keep it looking like walking: every leg has a real horizontal
+    /// travel (never a pure vertical elevator ride), and the last waypoint is
+    /// always `home`, so the pig returns to where it started. Far and near
+    /// turns are biased to opposite vertical lanes so it doesn't retrace a
+    /// single line, and the shape is an open zig-zag, never a closed circle.
     private func strollRoute(from home: NSPoint, size: NSSize) -> [NSPoint] {
         let frame = NSScreen.main?.visibleFrame
             ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
@@ -212,24 +211,35 @@ final class PetStateMachine {
             Geometry.clampWindowOrigin(p, size: size)
         }
 
-        // Horizontal direction with the most room so the walk can be long.
+        // Head toward whichever side has more room so the outing can be long.
         let dir: CGFloat = (maxX - home.x) >= (home.x - minX) ? 1 : -1
         let room = max(maxX - home.x, home.x - minX)
-        let out = min(CGFloat.random(in: 280...420), room * 0.85)
-        let connector = max(90, out * CGFloat.random(in: 0.33...0.45))
+        let span = min(CGFloat.random(in: 260...400), room * 0.9)
 
-        // Put the parallel lane on whichever side (up/down) has more space.
-        let vdir: CGFloat = (maxY - home.y) >= (home.y - minY) ? 1 : -1
-        let availableVertical = vdir > 0 ? (maxY - home.y) : (home.y - minY)
-        let laneHeight = min(CGFloat.random(in: 55...85), availableVertical)
+        // Random vertical spread. Far and near turns sit on opposite sides of
+        // `home`, so the outbound and inbound paths are visibly different.
+        let vdir: CGFloat = Bool.random() ? 1 : -1
+        let lane = CGFloat.random(in: 35...65)
+        func laneY(_ side: CGFloat) -> CGFloat {
+            let raw = home.y + vdir * side * lane * CGFloat.random(in: 0.3...0.9)
+            return min(max(raw, minY), maxY)
+        }
 
-        let lowerY = home.y
-        let upperY = home.y + laneHeight * vdir
-        let farX = home.x + out * dir
-        let p1 = fit(NSPoint(x: farX, y: lowerY))                       // out, lower lane
-        let p2 = fit(NSPoint(x: farX - connector * dir, y: upperY))     // diagonal up + back
-        let p3 = fit(NSPoint(x: home.x + connector * dir, y: upperY))   // back, other lane
-        return [p1, p2, p3, home]                                       // diagonal down + back
+        // Far turns go near the end of the span, near turns pull back to ~40%.
+        // Because the two progress bands never overlap, every consecutive pair
+        // (and the final leg home) keeps >= ~0.3*span of horizontal travel.
+        let legs = Int.random(in: 3...4)
+        var points: [NSPoint] = []
+        for i in 0..<legs {
+            let far = (i % 2 == 0)
+            let progress: CGFloat = far
+                ? CGFloat.random(in: 0.80...1.00)
+                : CGFloat.random(in: 0.32...0.50)
+            let x = min(max(home.x + span * dir * progress, minX), maxX)
+            points.append(fit(NSPoint(x: x, y: laneY(far ? 1 : -1))))
+        }
+        points.append(home)
+        return points
     }
 
     /// Walks a list of waypoints in order, honouring pointer interruption.
