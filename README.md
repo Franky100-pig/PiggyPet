@@ -12,6 +12,23 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Sleep state, tap-to-switch (image or text), drag-to-move, position memory
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
 
+## Download (macOS 13+)
+
+Grab `PiggyPet-<version>-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
+
+1. Unzip and move `PiggyPet.app` to `/Applications` (optional).
+2. Remove the download quarantine flag — the app is ad-hoc signed, not notarized:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/PiggyPet.app
+   ```
+
+   No Terminal? Right-click the app → **Open** → **Open** instead.
+
+3. Double-click to launch. There is no Dock icon: the pig sleeps just above the Dock on the left. Right-click it for the menu.
+
+Check the download against the SHA-256 in `PiggyPet-<version>-checksums.txt`.
+
 ## Build & run
 
 ```bash
