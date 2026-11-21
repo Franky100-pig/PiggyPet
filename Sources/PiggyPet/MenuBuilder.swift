@@ -30,6 +30,22 @@ final class MenuBuilder: NSObject {
         tantrumItem.state = Preferences.tantrumEnabled ? .on : .off
         menu.addItem(tantrumItem)
 
+        let nudgeItem = NSMenuItem(title: "拱鼠标频率", action: nil, keyEquivalent: "")
+        let nudgeMenu = NSMenu()
+        for freq in NudgeFrequency.allCases {
+            let freqItem = NSMenuItem(
+                title: freq.title,
+                action: #selector(setNudgeFrequency(_:)),
+                keyEquivalent: ""
+            )
+            freqItem.target = self
+            freqItem.representedObject = freq
+            freqItem.state = freq == Preferences.nudgeFrequency ? .on : .off
+            nudgeMenu.addItem(freqItem)
+        }
+        nudgeItem.submenu = nudgeMenu
+        menu.addItem(nudgeItem)
+
         let bubbleItem = NSMenuItem(
             title: "气泡文字",
             action: #selector(toggleBubbles), keyEquivalent: ""
@@ -99,6 +115,11 @@ final class MenuBuilder: NSObject {
         guard let level = sender.representedObject as? Excitement else { return }
         Preferences.setExcitement(level)
         stateMachine?.rescheduleStroll()
+    }
+
+    @objc private func setNudgeFrequency(_ sender: NSMenuItem) {
+        guard let freq = sender.representedObject as? NudgeFrequency else { return }
+        Preferences.setNudgeFrequency(freq)
     }
 
     @objc private func resetPosition() {
