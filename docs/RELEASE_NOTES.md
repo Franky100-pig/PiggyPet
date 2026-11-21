@@ -1,8 +1,14 @@
-# PiggyPet 0.4.2
+# PiggyPet 0.5.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.4.2
+## What's new in 0.5.0
+
+- **Adjustable walking pace.** New right-click submenu **走路速度** with 慢悠悠 / 正常 / 利索 (about 48 / 80 / 120 pt per second). The default is 正常, and switching takes effect on the next stroll.
+- **The angry running pig is animated now.** 快跑猪 is pulled from the 276-frame GIF as a 20-frame cycle, so a chase reads as a real sprint (170 pt/s) instead of a still image. It is used only when the pig is angry and chasing your cursor — normal strolls keep the calm walking animation.
+- Legs now keep pace with the body: the animation advances faster during a dash and slower during a saunter, so the pig no longer looks like it is sliding across the screen.
+
+## Also in 0.4.2
 
 - Stroll routes are now generated fresh every time — the number of turns, the distance and the lane heights are all randomized, so no two walks follow the same path. Two rules always hold: every leg has real horizontal travel (no vertical elevator movement), and the walk ends exactly where it started. Outbound and inbound turns are biased to different heights, so it never retraces one line or draws a circle.
 
@@ -34,8 +40,8 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 - Sleeping pig in the bottom-left corner; left-click switches between pig meme images and Chinese text bubbles
 - Drag to move, with the position remembered between launches
-- Walking animation with a long automatic stroll that walks out and back on a slightly different line; frequency follows the excitement level, plus **到处逛逛** / **追着鼠标** in the right-click menu
-- Right-click submenus **兴奋程度** (低 / 中 / 高) and **拱鼠标频率** (从不 / 偶尔 / 经常)
+- Walking and running animations with a long automatic stroll that walks out and back on a slightly different line; frequency follows the excitement level, plus **到处逛逛** / **追着鼠标** in the right-click menu
+- Right-click submenus **兴奋程度** (低 / 中 / 高), **拱鼠标频率** (从不 / 偶尔 / 经常) and **走路速度** (慢悠悠 / 正常 / 利索)
 - Optional mischief mode (off by default): the pig runs over and nudges your cursor using `CGWarpMouseCursorPosition` — no Accessibility permission needed
 - Borderless transparent floating panel, no Dock icon, pixel-accurate click-through
 - Right-click menu: switch face, stroll, chase cursor, mischief mode, bubble text, return to bottom-left, quit

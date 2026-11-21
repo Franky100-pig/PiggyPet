@@ -13,6 +13,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
 - Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own
 - Automatic activity is mostly a casual stroll; 拱鼠标频率 (从不 / 偶尔 / 经常) sets how often it becomes a cursor nudge instead (default 偶尔, ~20%). Manual 追着鼠标 always nudges.
+- 走路速度 (慢悠悠 / 正常 / 利索) sets how fast it ambles. Only an angry chase uses the fast 快跑猪 running animation.
 
 ## Download (macOS 13+)
 
