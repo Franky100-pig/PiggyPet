@@ -1,19 +1,24 @@
-# PiggyPet 0.1.0
+# PiggyPet 0.2.0
 
-First downloadable release for macOS 13+. One Universal zip covers both Apple Silicon and Intel Macs.
+Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
+
+## What's new in 0.2.0
+
+- Excitement level (低 / 中 / 高) in the right-click menu controls how often the pig wanders off on its own: low 3–5 min, medium 45–90 s, high 12–30 s. Switching levels takes effect immediately.
 
 ## What's inside
 
 - Sleeping pig in the bottom-left corner; left-click switches between pig meme images and Chinese text bubbles
 - Drag to move, with the position remembered between launches
-- Walking animation with an occasional 1–3 minute stroll, plus **到处逛逛** / **追着鼠标** in the right-click menu
+- Walking animation with an automatic stroll whose frequency follows the excitement level, plus **到处逛逛** / **追着鼠标** in the right-click menu
+- Right-click submenu **兴奋程度** (低 / 中 / 高) with an immediate effect on stroll timing
 - Optional mischief mode (off by default): the pig runs over and nudges your cursor using `CGWarpMouseCursorPosition` — no Accessibility permission needed
 - Borderless transparent floating panel, no Dock icon, pixel-accurate click-through
 - Right-click menu: switch face, stroll, chase cursor, mischief mode, bubble text, return to bottom-left, quit
 
 ## Install
 
-1. Download `PiggyPet-0.1.0-universal.zip` and unzip it.
+1. Download `PiggyPet-0.2.0-universal.zip` and unzip it.
 2. Move `PiggyPet.app` to `/Applications` (optional but recommended).
 3. The app is ad-hoc signed, not notarized, so remove the download quarantine flag once:
 
@@ -25,7 +30,7 @@ First downloadable release for macOS 13+. One Universal zip covers both Apple Si
 
 4. Double-click to launch. There is no Dock icon — look for the sleeping pig just above the Dock on the left, and right-click it for the menu.
 
-Verify your download with the SHA-256 in `PiggyPet-0.1.0-checksums.txt`.
+Verify your download with the SHA-256 in `PiggyPet-0.2.0-checksums.txt`.
 
 ## Notes
 
