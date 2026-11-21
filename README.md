@@ -12,6 +12,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Sleep state, tap-to-switch (image or text), drag-to-move, position memory
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
 - Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own
+- Automatic activity is mostly a casual stroll; 拱鼠标频率 (从不 / 偶尔 / 经常) sets how often it becomes a cursor nudge instead (default 偶尔, ~20%). Manual 追着鼠标 always nudges.
 
 ## Download (macOS 13+)
 
