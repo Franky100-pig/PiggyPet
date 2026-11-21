@@ -87,10 +87,32 @@ final class PetStateMachine {
         tantrumTimer = schedule(seconds: .random(in: range)) { [weak self] in
             guard let self else { return }
             if self.state == .sleep || self.state == .idle {
-                self.startChase()
+                self.performAutomaticActivity()
             } else {
                 self.rescheduleTantrum()
             }
+        }
+    }
+
+    /// An automatic activity is mostly a casual stroll; the configured
+    /// probability decides whether it becomes a cursor nudge instead.
+    private func shouldChase() -> Bool {
+        Double.random(in: 0..<1) < Preferences.nudgeFrequency.chaseProbability
+    }
+
+    func performAutomaticActivity() {
+        let chance = Preferences.nudgeFrequency.chaseProbability
+        let chase = shouldChase()
+        if ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1" {
+            NSLog("[PiggyPet] autoActivity=%@ freq=%@ p=%.2f",
+                  chase ? "chase" : "stroll",
+                  Preferences.nudgeFrequency.rawValue, chance)
+        }
+        if chase {
+            startChase() // re-arms both timers when the walk home completes
+        } else {
+            startStroll()
+            rescheduleTantrum() // startStroll only re-arms the stroll timer
         }
     }
 
@@ -103,6 +125,12 @@ final class PetStateMachine {
         switch action {
         case "tap": handleTap()
         case "tantrum": startChase()
+        case "auto": performAutomaticActivity()
+        case "nudgefreq":
+            let freq = Preferences.nudgeFrequency
+            let sample = (0..<1000).reduce(0) { total, _ in total + (self.shouldChase() ? 1 : 0) }
+            NSLog("[PiggyPet] nudgeFreq=%@ p=%.2f chase=%d/1000",
+                  freq.rawValue, freq.chaseProbability, sample)
         case "stroll": startStroll()
         case "excitement":
             rescheduleStroll()
