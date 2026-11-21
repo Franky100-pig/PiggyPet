@@ -38,6 +38,22 @@ final class MenuBuilder: NSObject {
         bubbleItem.state = Preferences.bubbleEnabled ? .on : .off
         menu.addItem(bubbleItem)
 
+        let excitementItem = NSMenuItem(title: "兴奋程度", action: nil, keyEquivalent: "")
+        let excitementMenu = NSMenu()
+        for level in Excitement.allCases {
+            let levelItem = NSMenuItem(
+                title: level.title,
+                action: #selector(setExcitement(_:)),
+                keyEquivalent: ""
+            )
+            levelItem.target = self
+            levelItem.representedObject = level
+            levelItem.state = level == Preferences.excitement ? .on : .off
+            excitementMenu.addItem(levelItem)
+        }
+        excitementItem.submenu = excitementMenu
+        menu.addItem(excitementItem)
+
         let resetItem = NSMenuItem(title: "回到左下角", action: #selector(resetPosition), keyEquivalent: "")
         resetItem.target = self
         menu.addItem(resetItem)
@@ -77,6 +93,12 @@ final class MenuBuilder: NSObject {
         if !Preferences.bubbleEnabled {
             stateMachine?.clearBubble()
         }
+    }
+
+    @objc private func setExcitement(_ sender: NSMenuItem) {
+        guard let level = sender.representedObject as? Excitement else { return }
+        Preferences.setExcitement(level)
+        stateMachine?.rescheduleStroll()
     }
 
     @objc private func resetPosition() {
