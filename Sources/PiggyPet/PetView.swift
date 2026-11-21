@@ -9,6 +9,17 @@ final class PetView: NSView {
     private var spriteImage: NSImage = AssetCatalog.shared.image(for: AssetCatalog.shared.sleepSprite)
     private var alphaRep: NSBitmapImageRep?
 
+    private var walkFrames: [NSImage] = []
+    private var walkIndex = 0
+    private(set) var isWalking = false
+
+    private var activeImage: NSImage {
+        isWalking && walkIndex < walkFrames.count ? walkFrames[walkIndex] : spriteImage
+    }
+    private var activeRep: NSBitmapImageRep? {
+        isWalking ? WalkCatalog.shared.alphaReps[safe: walkIndex] : alphaRep
+    }
+
     private var bubbleText: String?
     private var zzzAlpha: CGFloat = 1
     private var shakeOffset: CGFloat = 0
@@ -49,12 +60,38 @@ final class PetView: NSView {
         }
     }
 
+    // MARK: - Walking animation
+
+    func startWalking(facingRight: Bool) {
+        let catalog = WalkCatalog.shared
+        guard catalog.isAvailable else { return }
+        walkFrames = catalog.frames(facingRight: facingRight)
+        walkIndex = 0
+        isWalking = true
+        zzzAlpha = 0
+        bubbleText = nil
+        needsDisplay = true
+    }
+
+    func advanceWalkFrame() {
+        guard isWalking, !walkFrames.isEmpty else { return }
+        walkIndex = (walkIndex + 1) % walkFrames.count
+        needsDisplay = true
+    }
+
+    func stopWalking() {
+        isWalking = false
+        walkFrames = []
+        walkIndex = 0
+        needsDisplay = true
+    }
+
     // MARK: - Drawing
 
     override func draw(_ dirtyRect: NSRect) {
         NSGraphicsContext.current?.cgContext.clear(bounds)
 
-        if zzzAlpha > 0 {
+        if zzzAlpha > 0 && !isWalking {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: NSFont.systemFont(ofSize: 22, weight: .bold),
                 .foregroundColor: NSColor.systemPink.withAlphaComponent(zzzAlpha),
@@ -62,7 +99,7 @@ final class PetView: NSView {
             ("Zzz" as NSString).draw(at: NSPoint(x: 132, y: 42), withAttributes: attributes)
         }
 
-        spriteImage.draw(in: spriteRect)
+        activeImage.draw(in: spriteRect)
 
         if let bubbleText {
             drawBubble(bubbleText)
@@ -102,7 +139,7 @@ final class PetView: NSView {
         if bubbleText != nil && bubbleRect.contains(point) { return self }
 
         let rect = spriteRect
-        guard rect.contains(point), let rep = alphaRep else { return nil }
+        guard rect.contains(point), let rep = activeRep else { return nil }
         let x = Int((point.x - rect.minX) * CGFloat(rep.pixelsWide) / rect.width)
         let y = Int((point.y - rect.minY) * CGFloat(rep.pixelsHigh) / rect.height)
         guard x >= 0, x < rep.pixelsWide, y >= 0, y < rep.pixelsHigh else { return nil }
