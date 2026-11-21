@@ -23,6 +23,9 @@ final class PetView: NSView {
     private var bubbleText: String?
     private var zzzAlpha: CGFloat = 1
     private var shakeOffset: CGFloat = 0
+    /// Slop for near-edge clicks so a few points of wobble never land on a
+    /// transparent pixel and make the pet look unresponsive.
+    private let hitTolerance: CGFloat = 6
 
     private let spriteSize = NSSize(width: 160, height: 160)
     private var spriteRect: NSRect {
@@ -144,12 +147,31 @@ final class PetView: NSView {
 
         let rect = spriteRect
         guard rect.contains(point), let rep = activeRep else { return nil }
-        let x = Int((point.x - rect.minX) * CGFloat(rep.pixelsWide) / rect.width)
-        let y = Int((point.y - rect.minY) * CGFloat(rep.pixelsHigh) / rect.height)
-        guard x >= 0, x < rep.pixelsWide, y >= 0, y < rep.pixelsHigh else { return nil }
 
-        guard let color = rep.colorAt(x: x, y: y) else { return self }
-        return color.alphaComponent > 0.15 ? self : nil
+        // The torso core is always clickable. A few memes have fully
+        // transparent pixels in the middle (e.g. pig_0002); without this the
+        // click passes through and even the right-click menu cannot be opened
+        // to escape that sprite. Corners stay pixel-accurate for click-through.
+        if rect.insetBy(dx: 40, dy: 40).contains(point) { return self }
+
+        let scaleX = CGFloat(rep.pixelsWide) / rect.width
+        let scaleY = CGFloat(rep.pixelsHigh) / rect.height
+        let center = NSPoint(
+            x: (point.x - rect.minX) * scaleX,
+            y: (point.y - rect.minY) * scaleY
+        )
+        let step = hitTolerance * min(scaleX, scaleY) / 2
+        for dx in [-step, 0, step] {
+            for dy in [-step, 0, step] {
+                let x = Int((center.x + dx).rounded())
+                let y = Int((center.y + dy).rounded())
+                guard x >= 0, x < rep.pixelsWide, y >= 0, y < rep.pixelsHigh else { continue }
+                if let color = rep.colorAt(x: x, y: y), color.alphaComponent > 0.15 {
+                    return self
+                }
+            }
+        }
+        return nil
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }

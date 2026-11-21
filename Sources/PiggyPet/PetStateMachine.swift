@@ -110,6 +110,11 @@ final class PetStateMachine {
                   range.lowerBound, range.upperBound,
                   strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none")
         case "sleep": enterSleep()
+        case let action where action.hasPrefix("sprite:"):
+            let id = String(action.dropFirst("sprite:".count))
+            if let sprite = catalog.manifest.sprites.first(where: { $0.id == id }) {
+                view?.show(sprite)
+            }
         default: break
         }
     }
