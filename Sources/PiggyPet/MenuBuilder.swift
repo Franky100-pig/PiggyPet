@@ -12,6 +12,16 @@ final class MenuBuilder: NSObject {
         switchItem.target = self
         menu.addItem(switchItem)
 
+        let strollItem = NSMenuItem(title: "到处逛逛", action: #selector(goStroll), keyEquivalent: "")
+        strollItem.target = self
+        menu.addItem(strollItem)
+
+        let chaseItem = NSMenuItem(title: "追着鼠标", action: #selector(goChase), keyEquivalent: "")
+        chaseItem.target = self
+        menu.addItem(chaseItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let tantrumItem = NSMenuItem(
             title: "调皮模式",
             action: #selector(toggleTantrum), keyEquivalent: ""
@@ -42,6 +52,15 @@ final class MenuBuilder: NSObject {
 
     @objc private func switchSprite() {
         stateMachine?.handleTap()
+    }
+
+    @objc private func goStroll() {
+        stateMachine?.startStroll()
+    }
+
+    @objc private func goChase() {
+        // Explicit menu action: always poke the cursor, even with auto off.
+        stateMachine?.startChase(force: true)
     }
 
     @objc private func toggleTantrum() {
