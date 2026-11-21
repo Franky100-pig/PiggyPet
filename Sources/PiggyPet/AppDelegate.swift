@@ -34,6 +34,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window = panel
         stateMachine.start()
 
+        // Unplugging a display (or mirroring) can strand the pig outside the
+        // new desktop. Pull it back as soon as the screens change instead of
+        // waiting for the next launch.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(screensChanged),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
+
         let debugEnabled = ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
             || ProcessInfo.processInfo.arguments.contains("--debug")
         if debugEnabled {
@@ -64,6 +74,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @objc private func screensChanged() {
+        guard let window else { return }
+        let current = window.frame.origin
+        let safe = Geometry.clampWindowOrigin(current, size: window.frame.size)
+        guard safe != current else { return }
+        window.setFrameOrigin(safe)
+        Preferences.saveOrigin(safe)
+        NSLog("[PiggyPet] screen change: moved pet from %@ to %@",
+              NSStringFromPoint(current), NSStringFromPoint(safe))
+    }
+
     @objc private func debugNotification(_ note: Notification) {
         guard let action = note.object as? String else { return }
         switch action {
@@ -75,6 +96,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let petView {
                 menuBuilder.show(at: NSPoint(x: 60, y: 60), in: petView)
             }
+        case "about":
+            menuBuilder.showAbout()
+        case "menutitles":
+            NSLog("[PiggyPet] menu=%@", menuBuilder.titles().joined(separator: " | "))
         case "hittest":
             NSLog("[PiggyPet] hitTest body=%@ corner=%@",
                   petView?.hitTest(NSPoint(x: 100, y: 140)) != nil ? "hit" : "pass",

@@ -6,6 +6,16 @@ final class MenuBuilder: NSObject {
     weak var window: PetWindow?
 
     func show(at point: NSPoint, in view: NSView) {
+        makeMenu().popUp(positioning: nil, at: point, in: view)
+    }
+
+    /// Menu titles in order, separators included as `---`. Used by the debug
+    /// hook so the structure can be checked without driving the UI by hand.
+    func titles() -> [String] {
+        makeMenu().items.map { $0.isSeparatorItem ? "---" : $0.title }
+    }
+
+    private func makeMenu() -> NSMenu {
         let menu = NSMenu()
 
         let switchItem = NSMenuItem(title: "换个表情", action: #selector(switchSprite), keyEquivalent: "")
@@ -101,11 +111,14 @@ final class MenuBuilder: NSObject {
         menu.addItem(resetItem)
 
         menu.addItem(NSMenuItem.separator())
+        let aboutItem = NSMenuItem(title: "关于 PiggyPet", action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
         let quitItem = NSMenuItem(title: "退出 PiggyPet", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
-        menu.popUp(positioning: nil, at: point, in: view)
+        return menu
     }
 
     @objc private func switchSprite() {
@@ -171,6 +184,33 @@ final class MenuBuilder: NSObject {
         guard let window else { return }
         window.setFrameOrigin(Geometry.bottomLeftOrigin(for: window.frame.size))
         Preferences.saveOrigin(window.frame.origin)
+    }
+
+    @objc func showAbout() {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        let alert = NSAlert()
+        alert.alertStyle = .informational
+        alert.messageText = "PiggyPet \(version)"
+        alert.informativeText = """
+        build \(build)
+
+        一只住在桌面上的小猪。左键换表情，拖拽搬家，右键打开菜单。
+        开机自启可以在菜单里随时关掉。
+
+        github.com/Franky100-pig/PiggyPet
+        """
+        alert.addButton(withTitle: "好")
+        alert.addButton(withTitle: "打开项目主页")
+        // The pet panel floats above normal windows, so a plain alert would end
+        // up behind the pig. Match the panel's level.
+        alert.window.level = .floating
+        NSApp.activate(ignoringOtherApps: true)
+        if alert.runModal() == .alertSecondButtonReturn,
+           let url = URL(string: "https://github.com/Franky100-pig/PiggyPet") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     @objc private func quit() {
