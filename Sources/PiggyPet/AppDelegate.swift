@@ -59,6 +59,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSLog("[PiggyPet] hitTest body=%@ corner=%@",
                   petView?.hitTest(NSPoint(x: 100, y: 140)) != nil ? "hit" : "pass",
                   petView?.hitTest(NSPoint(x: 4, y: 4)) != nil ? "hit" : "pass")
+        case "where":
+            if let origin = window?.frame.origin {
+                let body = NSPoint(
+                    x: origin.x + PetView.spriteCenterOffset.x,
+                    y: origin.y + PetView.spriteCenterOffset.y
+                )
+                let cursor = NSEvent.mouseLocation
+                NSLog("[PiggyPet] window=%@ body=%@ cursor=%@ delta=(%.0f, %.0f)",
+                      NSStringFromPoint(origin), NSStringFromPoint(body),
+                      NSStringFromPoint(cursor),
+                      body.x - cursor.x, body.y - cursor.y)
+            }
         default:
             stateMachine.debugTrigger(action)
         }
