@@ -1,8 +1,14 @@
-# PiggyPet 0.5.0
+# PiggyPet 0.6.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.5.0
+## What's new in 0.6.0
+
+- **Wider wanderings.** A stroll now ranges roughly 380–620 pt from home instead of 260–400 pt, and it turns away from whichever screen edge is nearest, so the pig never walks itself half off the screen.
+- **No more pivot turns.** The old route walked straight legs and changed direction on the spot at each waypoint. Each outing now walks out on one lane, swings through a half-circle (radius 55–85 pt) at the far end, and ambles home on a shallow diagonal at a different height — so it never retraces its steps and never snaps around.
+- **Fixed:** the legs stopped pedalling while the pig was on a curve, and the sprite twitched as it went. The window now follows the whole route in a single pass instead of restarting a walk for each sample point, so the animation runs non-stop and the facing only flips once per turn.
+
+## Also in 0.5.0
 
 - **Adjustable walking pace.** New right-click submenu **走路速度** with 慢悠悠 / 正常 / 利索 (about 48 / 80 / 120 pt per second). The default is 正常, and switching takes effect on the next stroll.
 - **The angry running pig is animated now.** 快跑猪 is pulled from the 276-frame GIF as a 20-frame cycle, so a chase reads as a real sprint (170 pt/s) instead of a still image. It is used only when the pig is angry and chasing your cursor — normal strolls keep the calm walking animation.
