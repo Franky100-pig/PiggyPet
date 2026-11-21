@@ -18,6 +18,7 @@ RAW = ROOT / "assets" / ".source" / "raw"
 SELECTED = ROOT / "assets" / ".source" / "selected.json"
 OUT_DIR = ROOT / "Resources" / "sprites"
 CUSTOM_SLEEP = ROOT / "Resources" / "custom" / "sleep.png"
+CUSTOM_CHASE = ROOT / "assets" / ".source" / "custom" / "chase_run.jpg"
 MANIFEST = ROOT / "Resources" / "manifest.json"
 
 CANVAS = 160
@@ -253,6 +254,19 @@ def main() -> None:
                 "original": "user-provided 猪睡觉 meme (caption and template corners removed)",
                 "mood": "sleep",
                 "bubble": "呼…呼…",
+            }
+        )
+
+    if CUSTOM_CHASE.exists():
+        process_one(CUSTOM_CHASE, OUT_DIR / "chase.png")
+        sprites.append(
+            {
+                "id": "chase",
+                "kind": "image",
+                "file": "sprites/chase.png",
+                "original": "user-provided 快跑猪 (angry running pig, background removed)",
+                "mood": "angry",
+                "bubble": "别跑！",
             }
         )
 

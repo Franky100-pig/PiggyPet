@@ -236,6 +236,14 @@
       "bubble": "呼…呼…"
     },
     {
+      "id": "chase",
+      "kind": "image",
+      "file": "sprites/chase.png",
+      "original": "user-provided 快跑猪 (angry running pig, background removed)",
+      "mood": "angry",
+      "bubble": "别跑！"
+    },
+    {
       "id": "text_01",
       "kind": "text",
       "text": "猪猪不开心",

@@ -35,7 +35,7 @@ echo "==> Assembling bundle"
 cp "$PLIST" "$CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$CONTENTS/Info.plist"
 cp "$ROOT/Resources/manifest.json" "$CONTENTS/Resources/"
-for DIR in sprites walk custom; do
+for DIR in sprites walk run custom; do
   if [[ -d "$ROOT/Resources/$DIR" ]]; then
     cp -R "$ROOT/Resources/$DIR" "$CONTENTS/Resources/"
   fi
