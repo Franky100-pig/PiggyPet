@@ -102,6 +102,13 @@ final class PetStateMachine {
         case "tap": handleTap()
         case "tantrum": startChase()
         case "stroll": startStroll()
+        case "excitement":
+            rescheduleStroll()
+            let range = Preferences.excitement.strollInterval
+            NSLog("[PiggyPet] excitement=%@ stroll=%.0f-%.0fs timer=%@",
+                  Preferences.excitement.rawValue,
+                  range.lowerBound, range.upperBound,
+                  strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none")
         case "sleep": enterSleep()
         default: break
         }
@@ -217,9 +224,10 @@ final class PetStateMachine {
         }
     }
 
-    private func rescheduleStroll() {
+    func rescheduleStroll() {
         strollTimer?.invalidate()
-        strollTimer = schedule(seconds: .random(in: 45...90)) { [weak self] in
+        let range = Preferences.excitement.strollInterval
+        strollTimer = schedule(seconds: .random(in: range)) { [weak self] in
             guard let self else { return }
             if self.state == .sleep || self.state == .idle {
                 self.startStroll()
