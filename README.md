@@ -2,16 +2,18 @@
 
 A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or Chinese text when clicked, follows your cursor when dragged, and occasionally throws a tiny tantrum that nudges your mouse.
 
-> **Status:** 1.0.0 — first stable release. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
+> **Status:** 1.0.1 — first stable release, plus its first round of fixes. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
 
 ## Highlights
 
 - Native Swift / AppKit — no Electron, no Chromium, binary ~100 KB
 - Borderless transparent floating panel, no Dock icon
 - Pixel-accurate click-through: transparent parts of the sprite pass clicks to the app underneath
-- Sleep state, tap-to-switch (image or text), drag-to-move, position memory
+- Sleep state with a breathing Zzz, tap-to-switch (image or text), drag-to-move, position memory
 - Launch at login, enabled on first run and switchable any time from the menu
 - App icon generated from the source artwork by `scripts/make_icon.py`
+- 关于 PiggyPet in the menu shows the version and links to the project page
+- Re-clamps itself when the display layout changes, so unplugging a monitor never strands it off-screen
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
 - Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own
 - Automatic activity is mostly a casual stroll; 拱鼠标频率 (从不 / 偶尔 / 经常) sets how often it becomes a cursor nudge instead (default 偶尔, ~20%). Manual 追着鼠标 always nudges.
@@ -20,7 +22,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 
 ## Download (macOS 13+)
 
-Grab `PiggyPet-1.0.0-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
+Grab `PiggyPet-1.0.1-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
 
 1. Unzip and move `PiggyPet.app` to `/Applications` (optional).
 2. Remove the download quarantine flag — the app is ad-hoc signed, not notarized:

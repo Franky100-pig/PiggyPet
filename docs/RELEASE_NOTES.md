@@ -1,4 +1,17 @@
-# PiggyPet 1.0.0
+# PiggyPet 1.0.1
+
+First patch on top of 1.0.0. No behaviour changes to strolls, expressions or the
+menu layout — only the rough edges found while re-reading the 1.0.0 sources.
+
+## What's fixed in 1.0.1
+
+- **The Zzz breathes again.** The sleep pulse was a one-shot timer, so the Zzz dimmed once about a second after the pig fell asleep and then stayed dim for the whole nap. It now alternates slowly while the pig sleeps and stops the moment it wakes.
+- **The pig comes back when displays change.** Unplugging an external monitor (or rearranging screens) could leave it parked outside the new desktop until the next launch. It now re-clamps itself as soon as the screen layout changes, and saves the corrected spot.
+- **About PiggyPet.** New entry at the bottom of the right-click menu: version, build number, a one-line reminder of the controls, and a button to open the project page. Until now there was no way to see which version was running.
+- Finder's Get Info now has a category and a copyright line for the bundle.
+- The install steps below were still telling people to download `0.4.2`.
+
+## What's in 1.0.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
@@ -79,7 +92,7 @@ is expected to change shape again; later versions will be additive.
 
 ## Install
 
-1. Download `PiggyPet-0.4.2-universal.zip` and unzip it.
+1. Download `PiggyPet-1.0.1-universal.zip` and unzip it.
 2. Move `PiggyPet.app` to `/Applications` (optional but recommended).
 3. The app is ad-hoc signed, not notarized, so remove the download quarantine flag once:
 
@@ -91,7 +104,7 @@ is expected to change shape again; later versions will be additive.
 
 4. Double-click to launch. There is no Dock icon — look for the sleeping pig just above the Dock on the left, and right-click it for the menu.
 
-Verify your download with the SHA-256 in `PiggyPet-0.4.2-checksums.txt`.
+Verify your download with the SHA-256 in `PiggyPet-1.0.1-checksums.txt`.
 
 ## Notes
 
