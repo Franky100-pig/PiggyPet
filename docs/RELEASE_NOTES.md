@@ -1,8 +1,12 @@
-# PiggyPet 0.2.2
+# PiggyPet 0.3.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.2.2
+## What's new in 0.3.0
+
+- Automatic activity now prefers a casual stroll: only a configurable fraction of the time does it turn into a cursor nudge. New right-click submenu **拱鼠标频率** (从不 / 偶尔 / 经常) controls that fraction — default 偶尔 (~20%), so the pig wanders around far more often than it pokes your mouse. Set 从不 for strolls only; the manual **追着鼠标** action still always nudges.
+
+## Also in 0.2.2
 
 - After switching to a new face, the pig now goes back to sleep after 10–15 seconds of no interaction (previously 8–15 s). Any click or drag restarts the wait.
 
@@ -19,14 +23,14 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 - Sleeping pig in the bottom-left corner; left-click switches between pig meme images and Chinese text bubbles
 - Drag to move, with the position remembered between launches
 - Walking animation with an automatic stroll whose frequency follows the excitement level, plus **到处逛逛** / **追着鼠标** in the right-click menu
-- Right-click submenu **兴奋程度** (低 / 中 / 高) with an immediate effect on stroll timing
+- Right-click submenus **兴奋程度** (低 / 中 / 高) and **拱鼠标频率** (从不 / 偶尔 / 经常)
 - Optional mischief mode (off by default): the pig runs over and nudges your cursor using `CGWarpMouseCursorPosition` — no Accessibility permission needed
 - Borderless transparent floating panel, no Dock icon, pixel-accurate click-through
 - Right-click menu: switch face, stroll, chase cursor, mischief mode, bubble text, return to bottom-left, quit
 
 ## Install
 
-1. Download `PiggyPet-0.2.2-universal.zip` and unzip it.
+1. Download `PiggyPet-0.3.0-universal.zip` and unzip it.
 2. Move `PiggyPet.app` to `/Applications` (optional but recommended).
 3. The app is ad-hoc signed, not notarized, so remove the download quarantine flag once:
 
@@ -38,7 +42,7 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 4. Double-click to launch. There is no Dock icon — look for the sleeping pig just above the Dock on the left, and right-click it for the menu.
 
-Verify your download with the SHA-256 in `PiggyPet-0.2.2-checksums.txt`.
+Verify your download with the SHA-256 in `PiggyPet-0.3.0-checksums.txt`.
 
 ## Notes
 
