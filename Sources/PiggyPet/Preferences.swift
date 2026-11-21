@@ -81,6 +81,7 @@ enum Preferences {
         static let excitement = "excitementLevel"
         static let nudgeFrequency = "nudgeFrequency"
         static let walkPace = "walkPace"
+        static let loginItemAsked = "loginItemAsked"
     }
 
     private static let defaults: [String: Any] = [
@@ -91,6 +92,7 @@ enum Preferences {
         Key.excitement: Excitement.medium.rawValue,
         Key.nudgeFrequency: NudgeFrequency.occasionally.rawValue,
         Key.walkPace: WalkPace.normal.rawValue,
+        Key.loginItemAsked: false,
     ]
 
     static func register() {
@@ -163,5 +165,15 @@ enum Preferences {
 
     static func setWalkPace(_ value: WalkPace) {
         UserDefaults.standard.set(value.rawValue, forKey: Key.walkPace)
+    }
+
+    /// Whether the pig has already offered to start at login. Kept so a user
+    /// who switches it off is not asked again on every launch.
+    static var loginItemAsked: Bool {
+        UserDefaults.standard.bool(forKey: Key.loginItemAsked)
+    }
+
+    static func setLoginItemAsked(_ value: Bool) {
+        UserDefaults.standard.set(value, forKey: Key.loginItemAsked)
     }
 }

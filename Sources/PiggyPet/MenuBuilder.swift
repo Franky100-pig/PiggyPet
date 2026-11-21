@@ -86,6 +86,16 @@ final class MenuBuilder: NSObject {
         paceItem.submenu = paceMenu
         menu.addItem(paceItem)
 
+        let loginItemEntry = NSMenuItem(
+            title: "开机自启",
+            action: #selector(toggleLoginItem), keyEquivalent: ""
+        )
+        loginItemEntry.target = self
+        // Read live from the system, so switching it off in System Settings is
+        // reflected here instead of showing a stale check mark.
+        loginItemEntry.state = LoginItem.isEnabled ? .on : .off
+        menu.addItem(loginItemEntry)
+
         let resetItem = NSMenuItem(title: "回到左下角", action: #selector(resetPosition), keyEquivalent: "")
         resetItem.target = self
         menu.addItem(resetItem)
@@ -141,6 +151,20 @@ final class MenuBuilder: NSObject {
     @objc private func setWalkPace(_ sender: NSMenuItem) {
         guard let pace = sender.representedObject as? WalkPace else { return }
         Preferences.setWalkPace(pace)
+    }
+
+    @objc private func toggleLoginItem() {
+        let turnOn = !LoginItem.isEnabled
+        let enabled = LoginItem.setEnabled(turnOn)
+        // A manual decision sticks: the launch-time bootstrap must not re-enable
+        // it behind the user's back after they switch it off here.
+        Preferences.setLoginItemAsked(true)
+        guard turnOn, !enabled else { return }
+        // Registering can land in "requires approval" on macOS 13+, in which
+        // case the user has to allow it once in System Settings.
+        stateMachine?.flashBubble(LoginItem.needsApproval
+            ? "请在系统设置里允许开机自启"
+            : "开机自启没设上，稍后再试")
     }
 
     @objc private func resetPosition() {

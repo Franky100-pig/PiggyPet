@@ -21,6 +21,7 @@ final class PetStateMachine {
     private var tantrumTimer: Timer?
     private var strollTimer: Timer?
     private var zzzTimer: Timer?
+    private var flashWork: DispatchWorkItem?
     private var zzzPhase = 0
     /// Bumped on every direct pointer interaction so in-flight chase callbacks
     /// can tell they were interrupted and bail out.
@@ -124,6 +125,19 @@ final class PetStateMachine {
         view?.setBubble(nil)
     }
 
+    /// Short-lived bubble used for menu feedback (e.g. the login item needing
+    /// approval in System Settings). Ignored by the usual sleep/state changes,
+    /// which set their own text or clear it.
+    func flashBubble(_ text: String) {
+        flashWork?.cancel()
+        view?.setBubble(text)
+        let work = DispatchWorkItem { [weak self] in
+            self?.view?.setBubble(nil)
+        }
+        flashWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5, execute: work)
+    }
+
     /// Used only by the PIGGY_DEBUG distributed-notification hook.
     func debugTrigger(_ action: String) {
         switch action {
@@ -185,6 +199,12 @@ final class PetStateMachine {
             if let sprite = catalog.manifest.sprites.first(where: { $0.id == id }) {
                 view?.show(sprite)
             }
+        case let action where action.hasPrefix("login"):
+            let argument = action.dropFirst("login".count).drop(while: { $0 == ":" })
+            if argument == "on" || argument == "off" {
+                LoginItem.setEnabled(argument == "on")
+            }
+            NSLog("[PiggyPet] loginItem=%@", LoginItem.statusDescription)
         default: break
         }
     }

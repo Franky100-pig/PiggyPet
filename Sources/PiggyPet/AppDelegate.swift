@@ -47,6 +47,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 object: nil
             )
         }
+
+        // First launch turns launch-at-login on once. If that fails — the app is
+        // sitting in a random folder, say — the flag stays unset so a later
+        // launch can try again; either way the menu can switch it off, and that
+        // choice is final because we never ask twice.
+        if !Preferences.loginItemAsked {
+            let enabled = LoginItem.setEnabled(true)
+            if enabled || LoginItem.needsApproval {
+                Preferences.setLoginItemAsked(true)
+            }
+            NSLog("[PiggyPet] login item bootstrap=%@", LoginItem.statusDescription)
+            if LoginItem.needsApproval {
+                stateMachine.flashBubble("请在系统设置里允许开机自启")
+            }
+        }
     }
 
     @objc private func debugNotification(_ note: Notification) {
