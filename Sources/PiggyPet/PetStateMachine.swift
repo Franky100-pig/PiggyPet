@@ -45,7 +45,9 @@ final class PetStateMachine {
         view?.setBubble(Preferences.bubbleEnabled ? sprite.bubble : nil)
         view?.setZzz(0)
         state = .switching
-        scheduleAwake(seconds: .random(in: 8...15))
+        // After a tap, go back to sleep if the user does nothing for 10-15 s.
+        // Any pointer interaction invalidates this timer and restarts the wait.
+        scheduleAwake(seconds: .random(in: 10...15))
     }
 
     func beginPointerInteraction() {
@@ -110,6 +112,11 @@ final class PetStateMachine {
                   range.lowerBound, range.upperBound,
                   strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none")
         case "sleep": enterSleep()
+        case "state":
+            let awake = awakeTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none"
+            let stroll = strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none"
+            NSLog("[PiggyPet] state=%@ sprite=%@ awake=%@ stroll=%@",
+                  String(describing: state), view?.currentSprite.id ?? "nil", awake, stroll)
         case let action where action.hasPrefix("sprite:"):
             let id = String(action.dropFirst("sprite:".count))
             if let sprite = catalog.manifest.sprites.first(where: { $0.id == id }) {
