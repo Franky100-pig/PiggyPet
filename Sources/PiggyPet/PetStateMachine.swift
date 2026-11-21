@@ -140,6 +140,11 @@ final class PetStateMachine {
                   range.lowerBound, range.upperBound,
                   strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none")
         case "sleep": enterSleep()
+        case "where":
+            if let origin = window?.frame.origin {
+                NSLog("[PiggyPet] where=(%.0f,%.0f) state=%@",
+                      origin.x, origin.y, String(describing: state))
+            }
         case "state":
             let awake = awakeTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none"
             let stroll = strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none"
@@ -156,25 +161,88 @@ final class PetStateMachine {
 
     // MARK: - Walking behaviors
 
-    /// Casual short wander while idle; the pig walks a little, then sleeps.
+    /// A longer wander with a proper way home. The pig trots out along one
+    /// horizontal lane, cuts diagonally to a parallel lane, walks back along
+    /// that different lane, then cuts diagonally onto its starting spot.
+    /// The result is an irregular loop (never a circle, never a straight
+    /// there-and-back on the same line).
     func startStroll() {
         guard let window, walkAvailable else { return }
         awakeTimer?.invalidate()
         zzzTimer?.invalidate()
         strollTimer?.invalidate()
 
-        let origin = window.frame.origin
-        let span: CGFloat = .random(in: 90...170)
-        let direction: CGFloat = Bool.random() ? 1 : -1
-        let target = Geometry.clampWindowOrigin(
-            NSPoint(x: origin.x + span * direction, y: origin.y),
-            size: window.frame.size
-        )
-        state = .walking
-        mover.walk(to: target, facingRight: direction > 0) { [weak self] in
-            self?.enterSleep()
-            self?.rescheduleStroll()
+        let home = window.frame.origin
+        let size = window.frame.size
+        let waypoints = strollRoute(from: home, size: size)
+        let token = interactionToken
+
+        if debugEnabled {
+            let path = [home] + waypoints
+            NSLog("[PiggyPet] strollRoute=%@", path.map {
+                String(format: "(%.0f,%.0f)", $0.x, $0.y)
+            }.joined(separator: " -> "))
         }
+
+        state = .walking
+        walkRoute(waypoints, token: token) { [weak self] in
+            guard let self, self.interactionToken == token else { return }
+            self.enterSleep()
+            self.rescheduleStroll()
+        }
+    }
+
+    /// Builds the waypoints of a stroll: out, across, back, home.
+    private func strollRoute(from home: NSPoint, size: NSSize) -> [NSPoint] {
+        let frame = NSScreen.main?.visibleFrame
+            ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
+        let minX = frame.minX - size.width + 60
+        let maxX = frame.maxX - 60
+        let minY = frame.minY - size.height + 60
+        let maxY = frame.maxY - 60
+
+        func fit(_ p: NSPoint) -> NSPoint {
+            Geometry.clampWindowOrigin(p, size: size)
+        }
+
+        // Prefer the direction with more room so the walk can be long.
+        let roomRight = maxX - home.x
+        let roomLeft = home.x - minX
+        let direction: CGFloat = roomRight >= roomLeft ? 1 : -1
+        let room = max(roomRight, roomLeft)
+
+        let out = min(CGFloat.random(in: 260...420), room * 0.85)
+        // Vertical drift stays tiny (14–24 pt) and is spread across a long
+        // horizontal leg, so the pig reads as walking flat instead of sliding
+        // up or down like an elevator. No dedicated vertical segment.
+        let rise = min(CGFloat.random(in: 14...24), max(0, maxY - home.y))
+        let farX = home.x + out * direction
+
+        let outPoint = fit(NSPoint(x: farX, y: home.y + rise))
+        // Come back on a slightly lower line than the outbound one, so the
+        // two legs don't sit on exactly the same path.
+        let midX = home.x + out * 0.5 * direction
+        let backPoint = fit(NSPoint(x: midX, y: home.y + rise * 0.15))
+        return [outPoint, backPoint, home]
+    }
+
+    /// Walks a list of waypoints in order, honouring pointer interruption.
+    private func walkRoute(_ points: [NSPoint], token: Int, completion: @escaping () -> Void) {
+        guard let first = points.first else { completion(); return }
+        let remaining = Array(points.dropFirst())
+        let facingRight = first.x > (window?.frame.origin.x ?? first.x)
+        mover.walk(to: first, facingRight: facingRight) { [weak self] in
+            guard let self, self.interactionToken == token else { return }
+            if remaining.isEmpty {
+                completion()
+            } else {
+                self.walkRoute(remaining, token: token, completion: completion)
+            }
+        }
+    }
+
+    private var debugEnabled: Bool {
+        ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
     }
 
     /// Tantrum: trot over to the cursor, poke it a few times, trot back, sleep.
