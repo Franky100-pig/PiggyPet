@@ -159,7 +159,7 @@ final class PetStateMachine {
             let origin = window.frame.origin
             state = .walking
             mover.walk(to: NSPoint(x: origin.x + 240, y: origin.y),
-                       facingRight: true, speed: chaseSpeed, style: .dash) { [weak self] in
+                       speed: chaseSpeed, style: .dash) { [weak self] in
                 self?.enterSleep()
             }
         case "dashleft":
@@ -167,7 +167,7 @@ final class PetStateMachine {
             let origin = window.frame.origin
             state = .walking
             mover.walk(to: NSPoint(x: origin.x - 240, y: origin.y),
-                       facingRight: false, speed: chaseSpeed, style: .dash) { [weak self] in
+                       speed: chaseSpeed, style: .dash) { [weak self] in
                 self?.enterSleep()
             }
         case "where":
@@ -222,69 +222,87 @@ final class PetStateMachine {
         }
     }
 
-    /// Builds a random zig-zag walk. Turn count, span and lane heights are
-    /// re-rolled every time, so no two strolls follow the same path. Two hard
-    /// rules keep it looking like walking: every leg has a real horizontal
-    /// travel (never a pure vertical elevator ride), and the last waypoint is
-    /// always `home`, so the pig returns to where it started. Far and near
-    /// turns are biased to opposite vertical lanes so it doesn't retrace a
-    /// single line, and the shape is an open zig-zag, never a closed circle.
+    /// Builds a random wander: walk out on one lane, swing through a wide
+    /// half-circle at the far end, and amble home on a different lane.
+    ///
+    /// The turn is a real arc (radius 55–85 pt) rather than a pivot, so the
+    /// pig never jerks around on the spot. Gentle bends on both legs keep it
+    /// from looking like a ruler-straight line, every leg has real horizontal
+    /// travel (never a vertical elevator ride), and the path ends at `home`.
     private func strollRoute(from home: NSPoint, size: NSSize) -> [NSPoint] {
         let frame = NSScreen.main?.visibleFrame
             ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
-        let minX = frame.minX - size.width + 60
-        let maxX = frame.maxX - 60
-        let minY = frame.minY - size.height + 60
-        let maxY = frame.maxY - 60
+        // Keep the whole sprite on screen, not just the window: the sprite sits
+        // 20–180 pt across and 16–176 pt up inside the 200×240 window.
+        let minX = frame.minX - 20
+        let maxX = frame.maxX - 180
+        let minY = frame.minY - 16
+        let maxY = frame.maxY - 176
 
         func fit(_ p: NSPoint) -> NSPoint {
             Geometry.clampWindowOrigin(p, size: size)
+        }
+        func fitting(_ x: CGFloat, _ y: CGFloat) -> NSPoint {
+            fit(NSPoint(x: min(max(x, minX), maxX), y: min(max(y, minY), maxY)))
         }
 
         // Head toward whichever side has more room so the outing can be long.
         let dir: CGFloat = (maxX - home.x) >= (home.x - minX) ? 1 : -1
         let room = max(maxX - home.x, home.x - minX)
-        let span = min(CGFloat.random(in: 260...400), room * 0.9)
+        let span = min(CGFloat.random(in: 380...620), room * 0.92)
 
-        // Random vertical spread. Far and near turns sit on opposite sides of
-        // `home`, so the outbound and inbound paths are visibly different.
-        let vdir: CGFloat = Bool.random() ? 1 : -1
-        let lane = CGFloat.random(in: 35...65)
-        func laneY(_ side: CGFloat) -> CGFloat {
-            let raw = home.y + vdir * side * lane * CGFloat.random(in: 0.3...0.9)
-            return min(max(raw, minY), maxY)
+        // Turn away from the nearest screen edge, and shrink the arc if the
+        // space above (or below) cannot hold it.
+        let roomUp = maxY - home.y
+        let roomDown = home.y - minY
+        let turnSide: CGFloat = roomUp >= roomDown ? 1 : -1
+        let radius = min(CGFloat.random(in: 55...85),
+                         max(28, (turnSide > 0 ? roomUp : roomDown) * 0.42))
+        let drift = CGFloat.random(in: 12...30)
+
+        var path: [NSPoint] = [home]
+
+        // Outbound: two shallow bends, so the leg is not a drawn line.
+        path.append(fitting(home.x + dir * span * 0.36, home.y + drift))
+        path.append(fitting(home.x + dir * span * 0.72, home.y + drift * 0.65))
+
+        // Far point, then a half circle that turns the pig around.
+        let farY = home.y + drift * 0.35
+        let far = fitting(home.x + dir * span, farY)
+        let arcCentre = NSPoint(x: far.x, y: far.y + turnSide * radius)
+        let arcEnd = NSPoint(x: far.x, y: far.y + turnSide * radius * 2)
+        let startAngle = turnSide > 0 ? -CGFloat.pi / 2 : CGFloat.pi / 2
+        let sweep = turnSide > 0 ? CGFloat.pi : -CGFloat.pi
+        let steps = 30
+        for step in 1...steps {
+            let angle = startAngle + sweep * CGFloat(step) / CGFloat(steps)
+            path.append(fitting(
+                arcCentre.x + radius * cos(angle) * dir,
+                arcCentre.y + radius * sin(angle)
+            ))
         }
 
-        // Far turns go near the end of the span, near turns pull back to ~40%.
-        // Because the two progress bands never overlap, every consecutive pair
-        // (and the final leg home) keeps >= ~0.3*span of horizontal travel.
-        let legs = Int.random(in: 3...4)
-        var points: [NSPoint] = []
-        for i in 0..<legs {
-            let far = (i % 2 == 0)
-            let progress: CGFloat = far
-                ? CGFloat.random(in: 0.80...1.00)
-                : CGFloat.random(in: 0.32...0.50)
-            let x = min(max(home.x + span * dir * progress, minX), maxX)
-            points.append(fit(NSPoint(x: x, y: laneY(far ? 1 : -1))))
+        // Homeward: spread the descent evenly so the return is a long, shallow
+        // diagonal instead of a drop, with a couple of tiny bends for life.
+        let startY = arcEnd.y
+        for (t, wobble) in [(0.74 as CGFloat, 5 as CGFloat),
+                            (0.48, -4),
+                            (0.22, 3)] {
+            let x = home.x + dir * span * t
+            let y = startY + (home.y - startY) * (1 - t) + wobble
+            path.append(fitting(x, y))
         }
-        points.append(home)
-        return points
+        path.append(home)
+        return path
     }
 
-    /// Walks a list of waypoints in order, honouring pointer interruption.
+    /// Walks a whole routed path in one pass, honouring pointer interruption.
     private func walkRoute(_ points: [NSPoint], token: Int,
                            speed: CGFloat, completion: @escaping () -> Void) {
-        guard let first = points.first else { completion(); return }
-        let remaining = Array(points.dropFirst())
-        let facingRight = first.x > (window?.frame.origin.x ?? first.x)
-        mover.walk(to: first, facingRight: facingRight, speed: speed) { [weak self] in
+        guard !points.isEmpty else { completion(); return }
+        mover.walk(path: points, speed: speed) { [weak self] in
             guard let self, self.interactionToken == token else { return }
-            if remaining.isEmpty {
-                completion()
-            } else {
-                self.walkRoute(remaining, token: token, speed: speed, completion: completion)
-            }
+            completion()
         }
     }
 
@@ -319,8 +337,7 @@ final class PetStateMachine {
         )
         state = .walking
         let token = interactionToken
-        mover.walk(to: goal, facingRight: goal.x > home.x,
-                   speed: chaseSpeed, style: .dash) { [weak self] in
+        mover.walk(to: goal, speed: chaseSpeed, style: .dash) { [weak self] in
             guard let self, self.interactionToken == token else { return }
             self.enterTantrum(force: force)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
@@ -332,15 +349,14 @@ final class PetStateMachine {
     }
 
     private func walkHome(_ home: NSPoint) {
-        guard let window, walkAvailable else {
+        guard walkAvailable else {
             enterSleep()
             rescheduleTantrum()
             rescheduleStroll()
             return
         }
         state = .walking
-        mover.walk(to: home, facingRight: home.x > window.frame.origin.x,
-                   speed: chaseSpeed, style: .dash) { [weak self] in
+        mover.walk(to: home, speed: chaseSpeed, style: .dash) { [weak self] in
             self?.enterSleep()
             self?.rescheduleTantrum()
             self?.rescheduleStroll()
