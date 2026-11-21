@@ -19,6 +19,9 @@ fi
 if [[ -d "$ROOT/Resources/sprites" ]] && [[ -n "$(ls -A "$ROOT/Resources/sprites")" ]]; then
   cp -R "$ROOT/Resources/sprites" "$CONTENTS/Resources/"
 fi
+if [[ -d "$ROOT/Resources/walk" ]] && [[ -n "$(ls -A "$ROOT/Resources/walk")" ]]; then
+  cp -R "$ROOT/Resources/walk" "$CONTENTS/Resources/"
+fi
 
 codesign --force --deep -s - "$APP" 2>/dev/null || true
 touch "$APP"
