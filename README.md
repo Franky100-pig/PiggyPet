@@ -11,6 +11,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Pixel-accurate click-through: transparent parts of the sprite pass clicks to the app underneath
 - Sleep state, tap-to-switch (image or text), drag-to-move, position memory
 - Chinese speech bubbles and a right-click menu to disable the mischievous behavior
+- Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own
 
 ## Download (macOS 13+)
 
