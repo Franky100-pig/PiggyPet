@@ -16,8 +16,8 @@ enum Preferences {
     private static let defaults: [String: Any] = [
         Key.tantrumEnabled: false,
         Key.bubbleEnabled: true,
-        Key.tantrumIntervalMin: 300.0,
-        Key.tantrumIntervalMax: 600.0,
+        Key.tantrumIntervalMin: 60.0,
+        Key.tantrumIntervalMax: 180.0,
     ]
 
     static func register() {
@@ -60,8 +60,8 @@ enum Preferences {
     static var tantrumInterval: ClosedRange<TimeInterval> {
         let min = UserDefaults.standard.double(forKey: Key.tantrumIntervalMin)
         let max = UserDefaults.standard.double(forKey: Key.tantrumIntervalMax)
-        let lo = min > 0 ? min : 300
-        let hi = max > lo ? max : lo + 300
+        let lo = min > 0 ? min : 60
+        let hi = max > lo ? max : lo + 120
         return lo...hi
     }
 }
