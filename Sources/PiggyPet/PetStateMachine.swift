@@ -131,7 +131,8 @@ final class PetStateMachine {
     }
 
     /// Tantrum: trot over to the cursor, poke it a few times, trot back, sleep.
-    func startChase() {
+    /// `force` lets the menu action nudge even if auto-tantrum is switched off.
+    func startChase(force: Bool = false) {
         guard let window, walkAvailable else {
             rescheduleTantrum()
             return
@@ -143,16 +144,21 @@ final class PetStateMachine {
 
         let home = window.frame.origin
         let cursor = NSEvent.mouseLocation
-        // Aim a little below-left of the cursor so the pig's snout lands near it.
+        // Place the window so the pig's BODY center lands right beside the
+        // cursor (offset by the sprite's position inside the window). Leave a
+        // small gap so the snout reaches the cursor without covering it.
         let goal = Geometry.clampWindowOrigin(
-            NSPoint(x: cursor.x - 70, y: cursor.y - 20),
+            NSPoint(
+                x: cursor.x - PetView.spriteCenterOffset.x + 26,
+                y: cursor.y - PetView.spriteCenterOffset.y + 4
+            ),
             size: window.frame.size
         )
         state = .walking
         let token = interactionToken
         mover.walk(to: goal, facingRight: goal.x > home.x) { [weak self] in
             guard let self, self.interactionToken == token else { return }
-            self.enterTantrum()
+            self.enterTantrum(force: force)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
                 // A click/tap during the tantrum invalidates this chase.
                 guard self.interactionToken == token else { return }
@@ -176,7 +182,7 @@ final class PetStateMachine {
         }
     }
 
-    private func enterTantrum() {
+    private func enterTantrum(force: Bool = false) {
         state = .tantrum
         zzzTimer?.invalidate()
         view?.setZzz(0)
@@ -184,7 +190,7 @@ final class PetStateMachine {
         view?.setBubble(Preferences.bubbleEnabled ? "哼！别碰我！" : nil)
         view?.shake()
         if let window {
-            pusher.nudgeRepeatedly(petOrigin: window.frame.origin)
+            pusher.nudgeRepeatedly(petOrigin: window.frame.origin, force: force)
         }
     }
 

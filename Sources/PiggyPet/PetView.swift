@@ -28,6 +28,10 @@ final class PetView: NSView {
     private var spriteRect: NSRect {
         NSRect(x: 20 + shakeOffset, y: 64, width: spriteSize.width, height: spriteSize.height)
     }
+    /// Sprite center in window coordinates (bottom-left origin). The view is
+    /// flipped and the sprite rect is (20, 64, 160, 160) inside a 200x240 view,
+    /// so the center sits at x=20+80, y=240-64-80.
+    static let spriteCenterOffset = NSPoint(x: 100, y: 96)
     private let bubbleRect = NSRect(x: 14, y: 12, width: 172, height: 44)
 
     override var isFlipped: Bool { true }

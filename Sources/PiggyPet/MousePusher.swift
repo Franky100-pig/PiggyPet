@@ -6,9 +6,16 @@ import CoreGraphics
 @MainActor
 final class MousePusher {
     /// A single short nudge of the cursor away from the pet.
-    func nudge(petOrigin: NSPoint, delay: TimeInterval = 0) {
-        guard Preferences.tantrumEnabled else { return }
-        let pet = Geometry.toCG(petOrigin)
+    /// `force` lets an explicit menu action nudge even when auto-tantrum is off.
+    func nudge(petOrigin: NSPoint, delay: TimeInterval = 0, force: Bool = false) {
+        guard force || Preferences.tantrumEnabled else { return }
+        // Push along the line from the pig's BODY (not the window origin) to
+        // the cursor, so the shove appears to come from the snout.
+        let bodyOrigin = NSPoint(
+            x: petOrigin.x + PetView.spriteCenterOffset.x,
+            y: petOrigin.y + PetView.spriteCenterOffset.y
+        )
+        let pet = Geometry.toCG(bodyOrigin)
         guard let start = CGEvent(source: nil)?.location else { return }
 
         let dx = start.x - pet.x
@@ -18,15 +25,20 @@ final class MousePusher {
         let steps: [CGFloat] = [6, 10, 12, 9, 5]
 
         var cancelled = false
-        var previous = start
+        // Initialised on the FIRST scheduled step, not at call time: a burst
+        // schedules several nudges up front, and seeding `previous` here would
+        // make later rounds mistake the earlier round's warp for user movement.
+        var previous: CGPoint?
         for (index, step) in steps.enumerated() {
             DispatchQueue.main.asyncAfter(
                 deadline: .now() + delay + 0.1 * Double(index)
             ) {
-                guard Preferences.tantrumEnabled, !cancelled,
+                guard (force || Preferences.tantrumEnabled), !cancelled,
                       let current = CGEvent(source: nil)?.location else { return }
                 // The user moved the mouse deliberately - don't fight them.
-                if hypot(current.x - previous.x, current.y - previous.y) > 24 {
+                // Skip this check on the first step, which has no baseline yet.
+                if let prior = previous,
+                   hypot(current.x - prior.x, current.y - prior.y) > 24 {
                     cancelled = true
                     return
                 }
@@ -42,9 +54,9 @@ final class MousePusher {
     }
 
     /// Three short nudges in a row - the "keep poking you" tantrum burst.
-    func nudgeRepeatedly(petOrigin: NSPoint) {
+    func nudgeRepeatedly(petOrigin: NSPoint, force: Bool = false) {
         for burst in 0..<3 {
-            nudge(petOrigin: petOrigin, delay: 0.45 * Double(burst))
+            nudge(petOrigin: petOrigin, delay: 0.45 * Double(burst), force: force)
         }
     }
 
