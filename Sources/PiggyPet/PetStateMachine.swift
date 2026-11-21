@@ -191,11 +191,10 @@ final class PetStateMachine {
 
     // MARK: - Walking behaviors
 
-    /// A longer wander with a proper way home. The pig trots out along one
-    /// horizontal lane, cuts diagonally to a parallel lane, walks back along
-    /// that different lane, then cuts diagonally onto its starting spot.
-    /// The result is an irregular loop (never a circle, never a straight
-    /// there-and-back on the same line).
+    /// A wander that goes somewhere new every time. The trip ends wherever the
+    /// destination happened to be, and that spot becomes the starting point of
+    /// the next outing, so repeated strolls drift around the screen instead of
+    /// looping over the same corner.
     func startStroll() {
         guard let window, walkAvailable else { return }
         awakeTimer?.invalidate()
@@ -217,20 +216,32 @@ final class PetStateMachine {
         state = .walking
         walkRoute(waypoints, token: token, speed: strollSpeed) { [weak self] in
             guard let self, self.interactionToken == token else { return }
+            // It stops wherever the trip ended; remember that, so relaunching
+            // doesn't teleport the pig back to a position from hours ago.
+            if let end = self.window?.frame.origin {
+                Preferences.saveOrigin(end)
+            }
             self.enterSleep()
             self.rescheduleStroll()
         }
     }
 
-    /// Builds a random wander: walk out on one lane, swing through a wide
-    /// half-circle at the far end, and amble home on a different lane.
+    /// Plans one random outing leg by leg.
     ///
-    /// The turn is a real arc (radius 55–85 pt) rather than a pivot, so the
-    /// pig never jerks around on the spot. Gentle bends on both legs keep it
-    /// from looking like a ruler-straight line, every leg has real horizontal
-    /// travel (never a vertical elevator ride), and the path ends at `home`.
+    /// The old route was a single fixed silhouette — out on a lane, half-circle
+    /// at the far end, back to exactly the same spot — so every stroll looked
+    /// like the last one with slightly different numbers. Here each leg rolls
+    /// its own length, heading and whether it climbs or drops, so the trip has
+    /// no predetermined shape and no obligation to come home: it simply stops
+    /// where the last leg ended, and the next stroll starts from there.
+    ///
+    /// Constraint by construction, not by clamping: a leg's heading is held
+    /// within ±33° of horizontal, so nothing ever reads as a vertical lift, and
+    /// the heading drifts a little each leg (turning away from the screen edges)
+    /// so the route waves instead of running along a ruler line. The whole trip
+    /// keeps one travel direction, which rules out hairpin retraces and circles.
     private func strollRoute(from home: NSPoint, size: NSSize) -> [NSPoint] {
-        let frame = NSScreen.main?.visibleFrame
+        let frame = (window?.screen ?? NSScreen.main)?.visibleFrame
             ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
         // Keep the whole sprite on screen, not just the window: the sprite sits
         // 20–180 pt across and 16–176 pt up inside the 200×240 window.
@@ -242,58 +253,73 @@ final class PetStateMachine {
         func fit(_ p: NSPoint) -> NSPoint {
             Geometry.clampWindowOrigin(p, size: size)
         }
-        func fitting(_ x: CGFloat, _ y: CGFloat) -> NSPoint {
-            fit(NSPoint(x: min(max(x, minX), maxX), y: min(max(y, minY), maxY)))
+
+        let legs = Int.random(in: 3...5)
+        // Whole outing heads one way — the pig is going for a walk, not pacing
+        // in a loop. Left/right is picked from whichever side has room, so it
+        // never opens with a leg that has nowhere to go.
+        let roomRight = maxX - home.x
+        let roomLeft = home.x - minX
+        let direction: CGFloat
+        if roomRight < 320 {
+            direction = -1
+        } else if roomLeft < 320 {
+            direction = 1
+        } else {
+            // Weighted by open space, so it heads across the screen instead of
+            // hugging whichever wall it happens to stop near, but a trip toward
+            // the nearer side still happens now and then.
+            let share = roomRight / (roomRight + roomLeft)
+            direction = CGFloat.random(in: 0...1) < min(max(share, 0.2), 0.8) ? 1 : -1
         }
 
-        // Head toward whichever side has more room so the outing can be long.
-        let dir: CGFloat = (maxX - home.x) >= (home.x - minX) ? 1 : -1
-        let room = max(maxX - home.x, home.x - minX)
-        let span = min(CGFloat.random(in: 380...620), room * 0.92)
+        var current = home
+        var waypoints: [NSPoint] = []
+        var climbSign: CGFloat = Bool.random() ? 1 : -1
 
-        // Turn away from the nearest screen edge, and shrink the arc if the
-        // space above (or below) cannot hold it.
-        let roomUp = maxY - home.y
-        let roomDown = home.y - minY
-        let turnSide: CGFloat = roomUp >= roomDown ? 1 : -1
-        let radius = min(CGFloat.random(in: 55...85),
-                         max(28, (turnSide > 0 ? roomUp : roomDown) * 0.42))
-        let drift = CGFloat.random(in: 12...30)
+        for _ in 0..<legs {
+            let room = direction > 0 ? maxX - current.x : current.x - minX
+            let length = min(CGFloat.random(in: 150...310), room - 30)
+            guard length > 90 else { break }
 
-        var path: [NSPoint] = [home]
+            // Flip up/down most of the time, and steer away from the top and
+            // bottom of the screen before the pig gets there. Magnitude is
+            // re-rolled per leg, so the wave has an irregular profile instead of
+            // repeating the same sawtooth.
+            if Bool.random() { climbSign = -climbSign }
+            if maxY - current.y < 80 { climbSign = -1 }
+            else if current.y - minY < 80 { climbSign = 1 }
+            let climb = climbSign * CGFloat.random(in: 0.12...0.58)
 
-        // Outbound: two shallow bends, so the leg is not a drawn line.
-        path.append(fitting(home.x + dir * span * 0.36, home.y + drift))
-        path.append(fitting(home.x + dir * span * 0.72, home.y + drift * 0.65))
-
-        // Far point, then a half circle that turns the pig around.
-        let farY = home.y + drift * 0.35
-        let far = fitting(home.x + dir * span, farY)
-        let arcCentre = NSPoint(x: far.x, y: far.y + turnSide * radius)
-        let arcEnd = NSPoint(x: far.x, y: far.y + turnSide * radius * 2)
-        let startAngle = turnSide > 0 ? -CGFloat.pi / 2 : CGFloat.pi / 2
-        let sweep = turnSide > 0 ? CGFloat.pi : -CGFloat.pi
-        let steps = 30
-        for step in 1...steps {
-            let angle = startAngle + sweep * CGFloat(step) / CGFloat(steps)
-            path.append(fitting(
-                arcCentre.x + radius * cos(angle) * dir,
-                arcCentre.y + radius * sin(angle)
-            ))
+            let next = NSPoint(
+                x: current.x + direction * length,
+                y: min(max(current.y + length * tan(climb), minY), maxY)
+            )
+            waypoints.append(fit(next))
+            current = waypoints[waypoints.count - 1]
         }
 
-        // Homeward: spread the descent evenly so the return is a long, shallow
-        // diagonal instead of a drop, with a couple of tiny bends for life.
-        let startY = arcEnd.y
-        for (t, wobble) in [(0.74 as CGFloat, 5 as CGFloat),
-                            (0.48, -4),
-                            (0.22, 3)] {
-            let x = home.x + dir * span * t
-            let y = startY + (home.y - startY) * (1 - t) + wobble
-            path.append(fitting(x, y))
+        if waypoints.isEmpty {
+            // No room anywhere (tiny screen): one small hop is still better
+            // than a stroll that goes nowhere.
+            waypoints = [fit(NSPoint(x: home.x + 160, y: home.y))]
         }
-        path.append(home)
-        return path
+
+        let radius = CGFloat.random(in: 40...85)
+        if debugEnabled {
+            NSLog("[PiggyPet] strollPlan home=%@ legs=%ld radius=%.0f waypoints=%@",
+                  String(format: "(%.0f,%.0f)", home.x, home.y),
+                  legs, radius,
+                  ([home] + waypoints).map {
+                      String(format: "(%.0f,%.0f)", $0.x, $0.y)
+                  }.joined(separator: " → "))
+        }
+        // `home` goes in as the start so every waypoint — including the first —
+        // is an interior corner and gets a fillet; the mover prepends the
+        // window's current origin itself, hence the drop.
+        return Geometry.roundCorners([home] + waypoints, radius: radius)
+            .dropFirst()
+            .map(fit)
     }
 
     /// Walks a whole routed path in one pass, honouring pointer interruption.
