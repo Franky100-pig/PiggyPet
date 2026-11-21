@@ -1,8 +1,14 @@
-# PiggyPet 0.7.0
+# PiggyPet 0.8.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.7.0
+## What's new in 0.8.0
+
+- **A real app icon.** The sleeping pig now shows up in Finder, the Dock, the Login Items list and the About panel, drawn on Apple's icon grid (824 pt of art inside a 1024 pt canvas) with every size from 16 to 1024. `scripts/make_icon.py` rebuilds it from the source artwork and crops the caption off automatically.
+- **Launch at login, and a switch to turn it off.** The first launch registers PiggyPet with `SMAppService.mainApp`, so it greets you when the Mac starts. The right-click menu gained **开机自启**: toggle it off and it stays off — the app records that you made a choice and never re-enables it behind your back. If macOS parks the registration behind its approval switch, a speech bubble tells you to allow it in System Settings.
+- The menu check mark is read live from the system, so turning the pig off in System Settings → General → Login Items is reflected in the menu instead of showing a stale state.
+
+## Also in 0.7.0
 
 - **Strolls are generated, not templated.** The route used to be one fixed silhouette — walk out, half-circle at the far end, walk back to exactly where it started — with only length, radius and offset randomised. Every trip therefore looked the same. Each outing is now built leg by leg: 3–5 legs, each rolling its own length (150–310 pt) and its own gentle climb or drop, so the shape, the distance and the stopping point differ every time.
 - **No more coming home.** The pig stops wherever the trip ends and starts the next one from there. It drifts around the screen instead of repeatedly looping back to the same corner, and the position is remembered across relaunches.
