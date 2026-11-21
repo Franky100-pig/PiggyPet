@@ -3,7 +3,7 @@ import AppKit
 @MainActor
 final class PetStateMachine {
     enum State {
-        case sleep, idle, switching, tantrum, drag
+        case sleep, idle, switching, tantrum, drag, walking
     }
 
     private(set) var state: State = .sleep
@@ -12,23 +12,34 @@ final class PetStateMachine {
 
     private let catalog = AssetCatalog.shared
     private let pusher = MousePusher()
+    private let mover = WalkMover()
     private var awakeTimer: Timer?
     private var tantrumTimer: Timer?
+    private var strollTimer: Timer?
     private var zzzTimer: Timer?
     private var zzzPhase = 0
+    /// Bumped on every direct pointer interaction so in-flight chase callbacks
+    /// can tell they were interrupted and bail out.
+    private var interactionToken = 0
 
     func start() {
+        mover.view = view
+        mover.window = window
         enterSleep()
         rescheduleTantrum()
+        rescheduleStroll()
     }
 
     func stop() {
         awakeTimer?.invalidate()
         tantrumTimer?.invalidate()
+        strollTimer?.invalidate()
         zzzTimer?.invalidate()
+        mover.cancel()
     }
 
     func handleTap() {
+        mover.cancel()
         let sprite = catalog.random(except: view?.currentSprite.id)
         view?.show(sprite)
         view?.setBubble(Preferences.bubbleEnabled ? sprite.bubble : nil)
@@ -38,9 +49,12 @@ final class PetStateMachine {
     }
 
     func beginPointerInteraction() {
+        interactionToken += 1
         awakeTimer?.invalidate()
-        zzzTimer?.invalidate()
         tantrumTimer?.invalidate()
+        strollTimer?.invalidate()
+        zzzTimer?.invalidate()
+        mover.cancel()
         view?.setZzz(0)
         view?.setBubble(nil)
         state = .drag
@@ -53,11 +67,13 @@ final class PetStateMachine {
             enterIdle()
         }
         rescheduleTantrum()
+        rescheduleStroll()
     }
 
     func cancelTantrum() {
         tantrumTimer?.invalidate()
-        if state == .tantrum {
+        if state == .tantrum || state == .walking {
+            mover.cancel()
             enterIdle()
         }
     }
@@ -69,9 +85,10 @@ final class PetStateMachine {
         tantrumTimer = schedule(seconds: .random(in: range)) { [weak self] in
             guard let self else { return }
             if self.state == .sleep || self.state == .idle {
-                self.enterTantrum()
+                self.startChase()
+            } else {
+                self.rescheduleTantrum()
             }
-            self.rescheduleTantrum()
         }
     }
 
@@ -83,9 +100,79 @@ final class PetStateMachine {
     func debugTrigger(_ action: String) {
         switch action {
         case "tap": handleTap()
-        case "tantrum": enterTantrum()
+        case "tantrum": startChase()
+        case "stroll": startStroll()
         case "sleep": enterSleep()
         default: break
+        }
+    }
+
+    // MARK: - Walking behaviors
+
+    /// Casual short wander while idle; the pig walks a little, then sleeps.
+    func startStroll() {
+        guard let window, walkAvailable else { return }
+        awakeTimer?.invalidate()
+        zzzTimer?.invalidate()
+        strollTimer?.invalidate()
+
+        let origin = window.frame.origin
+        let span: CGFloat = .random(in: 90...170)
+        let direction: CGFloat = Bool.random() ? 1 : -1
+        let target = Geometry.clampWindowOrigin(
+            NSPoint(x: origin.x + span * direction, y: origin.y),
+            size: window.frame.size
+        )
+        state = .walking
+        mover.walk(to: target, facingRight: direction > 0) { [weak self] in
+            self?.enterSleep()
+            self?.rescheduleStroll()
+        }
+    }
+
+    /// Tantrum: trot over to the cursor, poke it a few times, trot back, sleep.
+    func startChase() {
+        guard let window, walkAvailable else {
+            rescheduleTantrum()
+            return
+        }
+        tantrumTimer?.invalidate()
+        strollTimer?.invalidate()
+        awakeTimer?.invalidate()
+        zzzTimer?.invalidate()
+
+        let home = window.frame.origin
+        let cursor = NSEvent.mouseLocation
+        // Aim a little below-left of the cursor so the pig's snout lands near it.
+        let goal = Geometry.clampWindowOrigin(
+            NSPoint(x: cursor.x - 70, y: cursor.y - 20),
+            size: window.frame.size
+        )
+        state = .walking
+        let token = interactionToken
+        mover.walk(to: goal, facingRight: goal.x > home.x) { [weak self] in
+            guard let self, self.interactionToken == token else { return }
+            self.enterTantrum()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                // A click/tap during the tantrum invalidates this chase.
+                guard self.interactionToken == token else { return }
+                self.walkHome(home)
+            }
+        }
+    }
+
+    private func walkHome(_ home: NSPoint) {
+        guard let window, walkAvailable else {
+            enterSleep()
+            rescheduleTantrum()
+            rescheduleStroll()
+            return
+        }
+        state = .walking
+        mover.walk(to: home, facingRight: home.x > window.frame.origin.x) { [weak self] in
+            self?.enterSleep()
+            self?.rescheduleTantrum()
+            self?.rescheduleStroll()
         }
     }
 
@@ -97,9 +184,8 @@ final class PetStateMachine {
         view?.setBubble(Preferences.bubbleEnabled ? "哼！别碰我！" : nil)
         view?.shake()
         if let window {
-            pusher.nudge(petOrigin: window.frame.origin)
+            pusher.nudgeRepeatedly(petOrigin: window.frame.origin)
         }
-        scheduleAwake(seconds: 1.4)
     }
 
     private func enterIdle() {
@@ -112,6 +198,7 @@ final class PetStateMachine {
 
     private func enterSleep() {
         state = .sleep
+        mover.cancel()
         view?.show(catalog.sleepSprite)
         view?.setBubble(nil)
         zzzPhase = 0
@@ -121,6 +208,18 @@ final class PetStateMachine {
             guard let self else { return }
             self.zzzPhase += 1
             self.view?.setZzz(self.zzzPhase % 2 == 0 ? 1.0 : 0.35)
+        }
+    }
+
+    private func rescheduleStroll() {
+        strollTimer?.invalidate()
+        strollTimer = schedule(seconds: .random(in: 45...90)) { [weak self] in
+            guard let self else { return }
+            if self.state == .sleep || self.state == .idle {
+                self.startStroll()
+            } else {
+                self.rescheduleStroll()
+            }
         }
     }
 
@@ -143,4 +242,6 @@ final class PetStateMachine {
         RunLoop.main.add(timer, forMode: .common)
         return timer
     }
+
+    private var walkAvailable: Bool { WalkCatalog.shared.isAvailable }
 }
