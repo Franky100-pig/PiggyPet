@@ -1,8 +1,12 @@
-# PiggyPet 0.2.0
+# PiggyPet 0.2.1
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.2.0
+## What's new in 0.2.1
+
+- Fixed clicks going dead after switching to a meme with a transparent center (notably `pig_0002`, two pigs side by side). The torso area is now always clickable, so the right-click menu can always be opened to switch away. Corners still pass clicks through, and near-edge clicks get a small tolerance.
+
+## Also in 0.2.0
 
 - Excitement level (低 / 中 / 高) in the right-click menu controls how often the pig wanders off on its own: low 3–5 min, medium 45–90 s, high 12–30 s. Switching levels takes effect immediately.
 
@@ -18,7 +22,7 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 ## Install
 
-1. Download `PiggyPet-0.2.0-universal.zip` and unzip it.
+1. Download `PiggyPet-0.2.1-universal.zip` and unzip it.
 2. Move `PiggyPet.app` to `/Applications` (optional but recommended).
 3. The app is ad-hoc signed, not notarized, so remove the download quarantine flag once:
 
@@ -30,7 +34,7 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 4. Double-click to launch. There is no Dock icon — look for the sleeping pig just above the Dock on the left, and right-click it for the menu.
 
-Verify your download with the SHA-256 in `PiggyPet-0.2.0-checksums.txt`.
+Verify your download with the SHA-256 in `PiggyPet-0.2.1-checksums.txt`.
 
 ## Notes
 
