@@ -1,8 +1,15 @@
-# PiggyPet 0.6.0
+# PiggyPet 0.7.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.6.0
+## What's new in 0.7.0
+
+- **Strolls are generated, not templated.** The route used to be one fixed silhouette — walk out, half-circle at the far end, walk back to exactly where it started — with only length, radius and offset randomised. Every trip therefore looked the same. Each outing is now built leg by leg: 3–5 legs, each rolling its own length (150–310 pt) and its own gentle climb or drop, so the shape, the distance and the stopping point differ every time.
+- **No more coming home.** The pig stops wherever the trip ends and starts the next one from there. It drifts around the screen instead of repeatedly looping back to the same corner, and the position is remembered across relaunches.
+- **Still no vertical legs, still no sharp turns.** Each leg is held within ±33° of horizontal, and every corner is filleted with a 40–85 pt arc, so the pig always reads as walking: max 16° of heading change per animation step, zero near-vertical samples across all test runs.
+- **Walks away from walls.** Left/right is weighted by open space (and forced away from an edge closer than 320 pt), so it stops hugging whichever wall it happens to fall asleep next to.
+
+## Also in 0.6.0
 
 - **Wider wanderings.** A stroll now ranges roughly 380–620 pt from home instead of 260–400 pt, and it turns away from whichever screen edge is nearest, so the pig never walks itself half off the screen.
 - **No more pivot turns.** The old route walked straight legs and changed direction on the spot at each waypoint. Each outing now walks out on one lane, swings through a half-circle (radius 55–85 pt) at the far end, and ambles home on a shallow diagonal at a different height — so it never retraces its steps and never snaps around.

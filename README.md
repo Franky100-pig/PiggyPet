@@ -14,7 +14,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - Excitement level (低 / 中 / 高) in the menu controls how often it wanders off on its own
 - Automatic activity is mostly a casual stroll; 拱鼠标频率 (从不 / 偶尔 / 经常) sets how often it becomes a cursor nudge instead (default 偶尔, ~20%). Manual 追着鼠标 always nudges.
 - 走路速度 (慢悠悠 / 正常 / 利索) sets how fast it ambles. Only an angry chase uses the fast 快跑猪 running animation.
-- Strolls range up to ~620 pt from home, turn through a wide half-circle rather than pivoting, and come back at a different height so they never retrace a line.
+- Every stroll is generated fresh: 3–5 legs of random length (150–310 pt) and random gentle climb, every corner rounded, so the pig walks a different wave each time. It stops wherever the trip ends instead of walking home, and remembers that spot across relaunches.
 
 ## Download (macOS 13+)
 
