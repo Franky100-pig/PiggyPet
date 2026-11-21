@@ -12,6 +12,8 @@ final class PetView: NSView {
     private var walkFrames: [NSImage] = []
     private var walkReps: [NSBitmapImageRep] = []
     private var walkIndex = 0
+    private var walkFacing = false
+    private var walkStyle: WalkStyle = .trot
     private(set) var isWalking = false
 
     private var activeImage: NSImage {
@@ -27,6 +29,11 @@ final class PetView: NSView {
     /// Slop for near-edge clicks so a few points of wobble never land on a
     /// transparent pixel and make the pet look unresponsive.
     private let hitTolerance: CGFloat = 6
+
+    private var debugEnabled: Bool {
+        ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug")
+    }
 
     private let spriteSize = NSSize(width: 160, height: 160)
     private var spriteRect: NSRect {
@@ -71,12 +78,27 @@ final class PetView: NSView {
     // MARK: - Walking animation
 
     func startWalking(facingRight: Bool, style: WalkStyle = .trot) {
+        // A curved path is walked in one pass, but a turn swaps the frame set.
+        // Keeping the index across that swap is what stops the legs from
+        // restarting at pose 0 every time the pig turns around.
+        if isWalking, walkStyle == style, !walkFrames.isEmpty {
+            if walkFacing != facingRight {
+                let catalog = WalkCatalog.shared
+                walkFrames = catalog.frames(style: style, facingRight: facingRight)
+                walkReps = catalog.alphaReps(style: style)
+                walkFacing = facingRight
+            }
+            needsDisplay = true
+            return
+        }
         let catalog = WalkCatalog.shared
         let frames = catalog.frames(style: style, facingRight: facingRight)
         guard !frames.isEmpty else { return }
         walkFrames = frames
         walkReps = catalog.alphaReps(style: style)
         walkIndex = 0
+        walkFacing = facingRight
+        walkStyle = style
         isWalking = true
         zzzAlpha = 0
         bubbleText = nil
@@ -86,6 +108,9 @@ final class PetView: NSView {
     func advanceWalkFrame() {
         guard isWalking, !walkFrames.isEmpty else { return }
         walkIndex = (walkIndex + 1) % walkFrames.count
+        if walkIndex == 0, debugEnabled {
+            NSLog("[PiggyPet] walkCycle done frames=%d", walkFrames.count)
+        }
         needsDisplay = true
     }
 

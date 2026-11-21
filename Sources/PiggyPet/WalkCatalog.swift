@@ -21,7 +21,7 @@ private func mirroredImage(_ image: NSImage) -> NSImage {
 }
 
 /// Which animation plays while the window moves.
-enum WalkStyle {
+enum WalkStyle: Equatable {
     case trot  // normal walk cycle (猪溜达)
     case dash  // angry running pig (快跑猪), used while chasing the cursor
 }
