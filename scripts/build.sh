@@ -13,6 +13,9 @@ swiftc -O \
   -o "$CONTENTS/MacOS/PiggyPet"
 
 cp "$ROOT/Resources/Info.plist.template" "$CONTENTS/Info.plist"
+if [[ -f "$ROOT/Resources/PiggyPet.icns" ]]; then
+  cp "$ROOT/Resources/PiggyPet.icns" "$CONTENTS/Resources/"
+fi
 if [[ -f "$ROOT/Resources/manifest.json" ]]; then
   cp "$ROOT/Resources/manifest.json" "$CONTENTS/Resources/"
 fi

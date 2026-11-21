@@ -4,3 +4,4 @@ assets/.source/
 *.pyc
 __pycache__/
 .workbuddy/
+Resources/icon-1024.png

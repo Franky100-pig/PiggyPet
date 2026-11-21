@@ -34,6 +34,7 @@ chmod 755 "$CONTENTS/MacOS/PiggyPet"
 echo "==> Assembling bundle"
 cp "$PLIST" "$CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$CONTENTS/Info.plist"
+cp "$ROOT/Resources/PiggyPet.icns" "$CONTENTS/Resources/"
 cp "$ROOT/Resources/manifest.json" "$CONTENTS/Resources/"
 for DIR in sprites walk run custom; do
   if [[ -d "$ROOT/Resources/$DIR" ]]; then
