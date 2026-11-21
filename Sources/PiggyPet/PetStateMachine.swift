@@ -108,7 +108,7 @@ final class PetStateMachine {
     func performAutomaticActivity() {
         let chance = Preferences.nudgeFrequency.chaseProbability
         let chase = shouldChase()
-        if ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1" {
+        if debugEnabled {
             NSLog("[PiggyPet] autoActivity=%@ freq=%@ p=%.2f",
                   chase ? "chase" : "stroll",
                   Preferences.nudgeFrequency.rawValue, chance)
@@ -434,14 +434,22 @@ final class PetStateMachine {
         mover.cancel()
         view?.show(catalog.sleepSprite)
         view?.setBubble(nil)
+        startZzzPulse()
+    }
+
+    /// Slow "breathing" of the Zzz text while asleep. This used to be a single
+    /// one-shot timer, so the Zzz dimmed once at 1.1 s and then stayed dim for
+    /// the whole nap; it now keeps alternating until the pig wakes up.
+    private func startZzzPulse() {
+        zzzTimer?.invalidate()
         zzzPhase = 0
         view?.setZzz(1)
-        zzzTimer?.invalidate()
-        zzzTimer = schedule(seconds: 1.1) { [weak self] in
+        let timer = scheduleRepeating(seconds: 1.6) { [weak self] in
             guard let self else { return }
-            self.zzzPhase += 1
-            self.view?.setZzz(self.zzzPhase % 2 == 0 ? 1.0 : 0.35)
+            self.zzzPhase = (self.zzzPhase + 1) % 2
+            self.view?.setZzz(self.zzzPhase == 0 ? 1.0 : 0.45)
         }
+        zzzTimer = timer
     }
 
     func rescheduleStroll() {
@@ -469,7 +477,18 @@ final class PetStateMachine {
 
     @discardableResult
     private func schedule(seconds: TimeInterval, action: @escaping () -> Void) -> Timer {
-        let timer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: false) { _ in
+        scheduleTimer(seconds: seconds, repeats: false, action: action)
+    }
+
+    @discardableResult
+    private func scheduleRepeating(seconds: TimeInterval, action: @escaping () -> Void) -> Timer {
+        scheduleTimer(seconds: seconds, repeats: true, action: action)
+    }
+
+    @discardableResult
+    private func scheduleTimer(seconds: TimeInterval, repeats: Bool,
+                               action: @escaping () -> Void) -> Timer {
+        let timer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: repeats) { _ in
             action()
         }
         timer.tolerance = min(1.0, seconds * 0.1)

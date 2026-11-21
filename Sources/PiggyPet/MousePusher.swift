@@ -61,7 +61,10 @@ final class MousePusher {
     }
 
     private static func debug(_ message: String) {
-        guard ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1" else { return }
+        // Keep parity with the other debug logging: `--debug` counts too, so a
+        // launch from Finder can be checked without exporting an env var.
+        guard ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug") else { return }
         NSLog("[PiggyPet] \(message)")
     }
 }
