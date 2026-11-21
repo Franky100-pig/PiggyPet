@@ -1,12 +1,24 @@
-# PiggyPet 0.8.0
+# PiggyPet 1.0.0
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.8.0
+**First stable release.** Behaviour is settled, settings are all reachable from
+the right-click menu, and there is a real app icon and login item. Nothing here
+is expected to change shape again; later versions will be additive.
 
-- **A real app icon.** The sleeping pig now shows up in Finder, the Dock, the Login Items list and the About panel, drawn on Apple's icon grid (824 pt of art inside a 1024 pt canvas) with every size from 16 to 1024. `scripts/make_icon.py` rebuilds it from the source artwork and crops the caption off automatically.
+## What's new in 1.0.0
+
+- **A real app icon.** The sleeping pig now shows up in Finder, the Dock and the Login Items list, drawn on Apple's icon grid (824 pt of art inside a 1024 pt canvas) with every size from 16 to 1024. `scripts/make_icon.py` rebuilds it from the source artwork and crops the caption off automatically.
 - **Launch at login, and a switch to turn it off.** The first launch registers PiggyPet with `SMAppService.mainApp`, so it greets you when the Mac starts. The right-click menu gained **开机自启**: toggle it off and it stays off — the app records that you made a choice and never re-enables it behind your back. If macOS parks the registration behind its approval switch, a speech bubble tells you to allow it in System Settings.
 - The menu check mark is read live from the system, so turning the pig off in System Settings → General → Login Items is reflected in the menu instead of showing a stale state.
+
+### What is in the box
+
+- A sleeping pig above the Dock: no Dock icon, no window chrome, transparent corners that pass clicks through to whatever is underneath.
+- Tap it to swap expression (35 in the pool, including five text jokes); drag it anywhere and it remembers where it fell asleep.
+- Generated strolls with no two trips alike, tuned by **兴奋程度** (低 / 中 / 高) and **走路速度** (慢悠悠 / 正常 / 利索).
+- **拱鼠标频率** (从不 / 偶尔 / 经常) for the occasional cursor nudge, plus a manual **追着鼠标** — the only place the fast 快跑猪 animation appears.
+- Speech bubbles, **调皮模式**, **气泡文字**, **开机自启**, **回到左下角** and **退出 PiggyPet** in the right-click menu.
 
 ## Also in 0.7.0
 

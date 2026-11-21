@@ -2,7 +2,7 @@
 
 A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or Chinese text when clicked, follows your cursor when dragged, and occasionally throws a tiny tantrum that nudges your mouse.
 
-> **Status:** early development. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
+> **Status:** 1.0.0 — first stable release. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
 
 ## Highlights
 
@@ -20,7 +20,7 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 
 ## Download (macOS 13+)
 
-Grab `PiggyPet-<version>-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
+Grab `PiggyPet-1.0.0-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
 
 1. Unzip and move `PiggyPet.app` to `/Applications` (optional).
 2. Remove the download quarantine flag — the app is ad-hoc signed, not notarized:
