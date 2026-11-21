@@ -13,6 +13,10 @@ final class PetStateMachine {
     private let catalog = AssetCatalog.shared
     private let pusher = MousePusher()
     private let mover = WalkMover()
+    /// Strolling pace comes from the 走路速度 menu; chasing is always a sprint
+    /// and is the only thing that uses the fast 快跑猪 animation.
+    private var strollSpeed: CGFloat { Preferences.walkPace.pointsPerSecond }
+    private let chaseSpeed: CGFloat = 170
     private var awakeTimer: Timer?
     private var tantrumTimer: Timer?
     private var strollTimer: Timer?
@@ -140,6 +144,32 @@ final class PetStateMachine {
                   range.lowerBound, range.upperBound,
                   strollTimer.map { String(format: "%.0fs", $0.fireDate.timeIntervalSinceNow) } ?? "none")
         case "sleep": enterSleep()
+        case "pace":
+            NSLog("[PiggyPet] pace=%@ stroll=%.0fpt/s chase=%.0fpt/s",
+                  Preferences.walkPace.rawValue, strollSpeed, chaseSpeed)
+        case let action where action.hasPrefix("pace:"):
+            let raw = String(action.dropFirst("pace:".count))
+            if let pace = WalkPace(rawValue: raw) {
+                Preferences.setWalkPace(pace)
+                NSLog("[PiggyPet] pace=%@ stroll=%.0fpt/s", pace.rawValue, strollSpeed)
+            }
+        case "dash":
+            // Visual check for the 快跑猪 run cycle, independent of the cursor.
+            guard let window else { break }
+            let origin = window.frame.origin
+            state = .walking
+            mover.walk(to: NSPoint(x: origin.x + 240, y: origin.y),
+                       facingRight: true, speed: chaseSpeed, style: .dash) { [weak self] in
+                self?.enterSleep()
+            }
+        case "dashleft":
+            guard let window else { break }
+            let origin = window.frame.origin
+            state = .walking
+            mover.walk(to: NSPoint(x: origin.x - 240, y: origin.y),
+                       facingRight: false, speed: chaseSpeed, style: .dash) { [weak self] in
+                self?.enterSleep()
+            }
         case "where":
             if let origin = window?.frame.origin {
                 NSLog("[PiggyPet] where=(%.0f,%.0f) state=%@",
@@ -185,7 +215,7 @@ final class PetStateMachine {
         }
 
         state = .walking
-        walkRoute(waypoints, token: token) { [weak self] in
+        walkRoute(waypoints, token: token, speed: strollSpeed) { [weak self] in
             guard let self, self.interactionToken == token else { return }
             self.enterSleep()
             self.rescheduleStroll()
@@ -243,22 +273,24 @@ final class PetStateMachine {
     }
 
     /// Walks a list of waypoints in order, honouring pointer interruption.
-    private func walkRoute(_ points: [NSPoint], token: Int, completion: @escaping () -> Void) {
+    private func walkRoute(_ points: [NSPoint], token: Int,
+                           speed: CGFloat, completion: @escaping () -> Void) {
         guard let first = points.first else { completion(); return }
         let remaining = Array(points.dropFirst())
         let facingRight = first.x > (window?.frame.origin.x ?? first.x)
-        mover.walk(to: first, facingRight: facingRight) { [weak self] in
+        mover.walk(to: first, facingRight: facingRight, speed: speed) { [weak self] in
             guard let self, self.interactionToken == token else { return }
             if remaining.isEmpty {
                 completion()
             } else {
-                self.walkRoute(remaining, token: token, completion: completion)
+                self.walkRoute(remaining, token: token, speed: speed, completion: completion)
             }
         }
     }
 
     private var debugEnabled: Bool {
         ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug")
     }
 
     /// Tantrum: trot over to the cursor, poke it a few times, trot back, sleep.
@@ -287,7 +319,8 @@ final class PetStateMachine {
         )
         state = .walking
         let token = interactionToken
-        mover.walk(to: goal, facingRight: goal.x > home.x) { [weak self] in
+        mover.walk(to: goal, facingRight: goal.x > home.x,
+                   speed: chaseSpeed, style: .dash) { [weak self] in
             guard let self, self.interactionToken == token else { return }
             self.enterTantrum(force: force)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
@@ -306,7 +339,8 @@ final class PetStateMachine {
             return
         }
         state = .walking
-        mover.walk(to: home, facingRight: home.x > window.frame.origin.x) { [weak self] in
+        mover.walk(to: home, facingRight: home.x > window.frame.origin.x,
+                   speed: chaseSpeed, style: .dash) { [weak self] in
             self?.enterSleep()
             self?.rescheduleTantrum()
             self?.rescheduleStroll()
@@ -317,8 +351,8 @@ final class PetStateMachine {
         state = .tantrum
         zzzTimer?.invalidate()
         view?.setZzz(0)
-        view?.show(catalog.angrySprite())
-        view?.setBubble(Preferences.bubbleEnabled ? "哼！别碰我！" : nil)
+        view?.show(catalog.chaseSprite)
+        view?.setBubble(Preferences.bubbleEnabled ? "别跑！" : nil)
         view?.shake()
         if let window {
             pusher.nudgeRepeatedly(petOrigin: window.frame.origin, force: force)

@@ -34,7 +34,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window = panel
         stateMachine.start()
 
-        if ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1" {
+        let debugEnabled = ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug")
+        if debugEnabled {
+            // Also mirror NSLog to a file: handy when the app is started with
+            // `open` and the unified log is awkward to query.
+            freopen("/tmp/piggy-debug.log", "a", stderr)
             DistributedNotificationCenter.default().addObserver(
                 self,
                 selector: #selector(debugNotification(_:)),
