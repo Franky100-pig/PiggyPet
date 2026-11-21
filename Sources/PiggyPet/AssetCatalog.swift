@@ -57,6 +57,11 @@ final class AssetCatalog {
         return pool.randomElement() ?? random()
     }
 
+    /// The angry running pig: used for the chase dash and the nudge itself.
+    var chaseSprite: Sprite {
+        manifest.sprites.first { $0.id == "chase" } ?? angrySprite()
+    }
+
     func image(for sprite: Sprite) -> NSImage {
         if let cached = images[sprite.id] { return cached }
         let image: NSImage

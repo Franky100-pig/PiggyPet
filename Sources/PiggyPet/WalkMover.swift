@@ -11,14 +11,21 @@ final class WalkMover {
     private var frameTimer: Timer?
     private var onComplete: (() -> Void)?
 
-    /// Speed in points per second along the path.
+    /// Default speed in points per second. Callers can override per walk:
+    /// a slow saunter for idle strolls, a fast dash when chasing the cursor.
     private let speed: CGFloat = 110
-    /// Walk-frame advance interval; ~19 frames over ~1.1s reads as a brisk trot.
-    private let frameInterval: TimeInterval = 0.06
+    /// Frame interval tuned for the 110 pt/s trot (20 frames ≈ 1.2 s).
+    private let baseFrameInterval: TimeInterval = 0.06
 
     var isMoving: Bool { moveTimer != nil }
 
-    func walk(to target: NSPoint, facingRight: Bool, completion: @escaping () -> Void) {
+    /// - Parameters:
+    ///   - speed: optional pt/s override; defaults to the normal trot speed.
+    ///   - style: which animation to play; `.dash` is the angry running pig
+    ///            used while chasing the cursor.
+    func walk(to target: NSPoint, facingRight: Bool,
+              speed overrideSpeed: CGFloat? = nil, style: WalkStyle = .trot,
+              completion: @escaping () -> Void) {
         cancel()
         guard let window else { completion(); return }
 
@@ -27,13 +34,27 @@ final class WalkMover {
         let distance = hypot(dx, target.y - from.y)
         guard distance > 1 else { completion(); return }
 
-        // The walk art faces left in its source frames; move right -> mirror.
-        view?.startWalking(facingRight: dx > 0)
+        // The source art faces left; the catalog mirrors it to face right.
+        view?.startWalking(facingRight: dx > 0, style: style)
         onComplete = completion
 
-        startFrameTimer()
+        // Legs keep pace with the body: a slow saunter cycles slower, a dash
+        // faster, so the pig never looks like it is sliding across the screen.
+        let actualSpeed = max(overrideSpeed ?? speed, 1)
+        let interval = min(0.14, max(0.035, baseFrameInterval * speed / actualSpeed))
+        startFrameTimer(interval: interval)
 
-        let duration = TimeInterval(distance / speed)
+        let duration = TimeInterval(distance / actualSpeed)
+        if ProcessInfo.processInfo.environment["PIGGY_DEBUG"] == "1"
+            || ProcessInfo.processInfo.arguments.contains("--debug") {
+            let label: String
+            switch style {
+            case .trot: label = "trot"
+            case .dash: label = "dash"
+            }
+            NSLog("[PiggyPet] walk style=%@ speed=%.0fpt/s dist=%.0f dur=%.1fs interval=%.0fms",
+                  label, actualSpeed, distance, duration, interval * 1000)
+        }
         let started = Date()
         moveTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] timer in
             guard let self else { timer.invalidate(); return }
@@ -62,8 +83,8 @@ final class WalkMover {
         view?.stopWalking()
     }
 
-    private func startFrameTimer() {
-        frameTimer = Timer.scheduledTimer(withTimeInterval: frameInterval, repeats: true) { [weak self] _ in
+    private func startFrameTimer(interval: TimeInterval) {
+        frameTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             self?.view?.advanceWalkFrame()
         }
         RunLoop.main.add(frameTimer!, forMode: .common)

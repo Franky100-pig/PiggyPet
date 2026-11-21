@@ -10,6 +10,7 @@ final class PetView: NSView {
     private var alphaRep: NSBitmapImageRep?
 
     private var walkFrames: [NSImage] = []
+    private var walkReps: [NSBitmapImageRep] = []
     private var walkIndex = 0
     private(set) var isWalking = false
 
@@ -17,7 +18,7 @@ final class PetView: NSView {
         isWalking && walkIndex < walkFrames.count ? walkFrames[walkIndex] : spriteImage
     }
     private var activeRep: NSBitmapImageRep? {
-        isWalking ? WalkCatalog.shared.alphaReps[safe: walkIndex] : alphaRep
+        isWalking ? walkReps[safe: walkIndex] : alphaRep
     }
 
     private var bubbleText: String?
@@ -69,10 +70,12 @@ final class PetView: NSView {
 
     // MARK: - Walking animation
 
-    func startWalking(facingRight: Bool) {
+    func startWalking(facingRight: Bool, style: WalkStyle = .trot) {
         let catalog = WalkCatalog.shared
-        guard catalog.isAvailable else { return }
-        walkFrames = catalog.frames(facingRight: facingRight)
+        let frames = catalog.frames(style: style, facingRight: facingRight)
+        guard !frames.isEmpty else { return }
+        walkFrames = frames
+        walkReps = catalog.alphaReps(style: style)
         walkIndex = 0
         isWalking = true
         zzzAlpha = 0
@@ -89,6 +92,7 @@ final class PetView: NSView {
     func stopWalking() {
         isWalking = false
         walkFrames = []
+        walkReps = []
         walkIndex = 0
         needsDisplay = true
     }
