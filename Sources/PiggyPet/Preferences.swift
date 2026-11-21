@@ -22,6 +22,28 @@ enum Excitement: String, CaseIterable {
     }
 }
 
+/// How often an automatic activity turns into a cursor nudge instead of a
+/// plain stroll. Strolling is always the default outcome.
+enum NudgeFrequency: String, CaseIterable {
+    case never, occasionally, often
+
+    var title: String {
+        switch self {
+        case .never: return "从不"
+        case .occasionally: return "偶尔"
+        case .often: return "经常"
+        }
+    }
+
+    var chaseProbability: Double {
+        switch self {
+        case .never: return 0
+        case .occasionally: return 0.2
+        case .often: return 0.6
+        }
+    }
+}
+
 /// Thin UserDefaults wrapper. Values are read at use time so `defaults write`
 /// from a terminal can tweak behavior after a relaunch.
 @MainActor
@@ -34,6 +56,7 @@ enum Preferences {
         static let tantrumIntervalMin = "tantrumIntervalMin"
         static let tantrumIntervalMax = "tantrumIntervalMax"
         static let excitement = "excitementLevel"
+        static let nudgeFrequency = "nudgeFrequency"
     }
 
     private static let defaults: [String: Any] = [
@@ -42,6 +65,7 @@ enum Preferences {
         Key.tantrumIntervalMin: 60.0,
         Key.tantrumIntervalMax: 180.0,
         Key.excitement: Excitement.medium.rawValue,
+        Key.nudgeFrequency: NudgeFrequency.occasionally.rawValue,
     ]
 
     static func register() {
@@ -96,5 +120,14 @@ enum Preferences {
 
     static func setExcitement(_ value: Excitement) {
         UserDefaults.standard.set(value.rawValue, forKey: Key.excitement)
+    }
+
+    static var nudgeFrequency: NudgeFrequency {
+        let raw = UserDefaults.standard.string(forKey: Key.nudgeFrequency) ?? ""
+        return NudgeFrequency(rawValue: raw) ?? .occasionally
+    }
+
+    static func setNudgeFrequency(_ value: NudgeFrequency) {
+        UserDefaults.standard.set(value.rawValue, forKey: Key.nudgeFrequency)
     }
 }
