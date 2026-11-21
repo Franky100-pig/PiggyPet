@@ -1,8 +1,12 @@
-# PiggyPet 0.4.0
+# PiggyPet 0.4.1
 
 Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
-## What's new in 0.4.0
+## What's new in 0.4.1
+
+- Strolls now follow a four-leg route with three turns: out along one lane, diagonally up to a **different** parallel lane, back along that lane, then diagonally home. The two lanes sit 55–85 pt apart, so the pig clearly does not retrace its steps, and every connector has real horizontal travel so it never looks like a vertical elevator ride. Still no closed loops.
+
+## Also in 0.4.0
 
 - Strolls are now much longer (roughly 260–420 pt out, about 8 s round trip) and come back: the pig trots out, returns along a slightly different line, and angles home. It no longer walks a short distance and instantly falls asleep. Vertical drift is kept to ~15–25 pt over the whole walk, so it reads as walking flat rather than sliding up and down. No loops or retracing the exact same line.
 
@@ -34,7 +38,7 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 ## Install
 
-1. Download `PiggyPet-0.4.0-universal.zip` and unzip it.
+1. Download `PiggyPet-0.4.1-universal.zip` and unzip it.
 2. Move `PiggyPet.app` to `/Applications` (optional but recommended).
 3. The app is ad-hoc signed, not notarized, so remove the download quarantine flag once:
 
@@ -46,7 +50,7 @@ Universal build for macOS 13+, covering both Apple Silicon and Intel Macs.
 
 4. Double-click to launch. There is no Dock icon — look for the sleeping pig just above the Dock on the left, and right-click it for the menu.
 
-Verify your download with the SHA-256 in `PiggyPet-0.4.0-checksums.txt`.
+Verify your download with the SHA-256 in `PiggyPet-0.4.1-checksums.txt`.
 
 ## Notes
 
