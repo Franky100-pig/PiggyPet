@@ -1,3 +1,20 @@
+# PiggyPet 1.1.0
+
+PiggyPet runs on Windows now.
+
+## What's new in 1.1.0
+
+- **A native Windows build.** Not the Mac app in a wrapper: AppKit and Win32 share no window model, so the pet was ported to C# / WinForms on .NET Framework 4.8 — the runtime that already ships with Windows 10 (1903+) and Windows 11. The exe is ~130 KB and the zip is under 2 MB, because there is no bundled runtime, no Electron and no installer. Unzip, double-click `PiggyPet.exe`.
+- **The same pig, the same rules.** All 35 faces, the generated 3–5 leg strolls with filleted corners, the no-vertical-legs rule, the excitement/pace/nudge menu, the breathing Zzz, the 10–15 s return to sleep, and the one-time first-run hint. Both builds read the same `Resources/` folder, so artwork changes apply to both.
+- **Windows-native plumbing.** A layered window with per-pixel alpha for the transparent background, `WM_NCHITTEST` returning `HTTRANSPARENT` so clicks pass through the pig's transparent corners, `SetCursorPos` for nudges (no permission prompt), and `HKCU\...\Run` for 开机自启 — switchable off from the menu at any time.
+- **macOS 1.1.0 is behaviour-identical to 1.0.1.** It is rebuilt only so both platforms share a version number and a release page.
+
+### About the Windows build's maturity
+
+The Windows port is compile-verified on `windows-latest` and its platform-independent logic (manifest, sprite files, stroll geometry, arc-length walking) is covered by checks that run on the build machine — 400 random routes, no vertical legs, worst turn 5.6°, nothing off-screen.
+
+The parts that need a real Windows desktop — layered-window rendering, click-through, DPI scaling, the context menu, SmartScreen, the registry login item — have not been run on Windows hardware yet. Treat this as the first cut: if something is off, `%TEMP%\piggy-error.log` and `%TEMP%\piggy-debug.log` (`--debug`) are what to attach to an issue.
+
 # PiggyPet 1.0.1
 
 First patch on top of 1.0.0. No behaviour changes to strolls, expressions or the

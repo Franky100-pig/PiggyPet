@@ -1,12 +1,12 @@
 # PiggyPet
 
-A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or Chinese text when clicked, follows your cursor when dragged, and occasionally throws a tiny tantrum that nudges your mouse.
+A tiny desktop pet for macOS and Windows: sleeps in the corner, turns into random pig memes or Chinese text when clicked, follows your cursor when dragged, and occasionally throws a tiny tantrum that nudges your mouse.
 
-> **Status:** 1.0.1 — first stable release, plus its first round of fixes. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
+> **Status:** 1.1.0 — macOS and Windows, from one set of assets. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
 
 ## Highlights
 
-- Native Swift / AppKit — no Electron, no Chromium, binary ~100 KB
+- Native on both sides — Swift / AppKit on macOS (~100 KB), C# / WinForms on Windows (~130 KB exe). No Electron, no Chromium.
 - Borderless transparent floating panel, no Dock icon
 - Pixel-accurate click-through: transparent parts of the sprite pass clicks to the app underneath
 - Sleep state with a breathing Zzz, tap-to-switch (image or text), drag-to-move, position memory
@@ -20,9 +20,21 @@ A tiny macOS desktop pet: sleeps in the corner, turns into random pig memes or C
 - 走路速度 (慢悠悠 / 正常 / 利索) sets how fast it ambles. Only an angry chase uses the fast 快跑猪 running animation.
 - Every stroll is generated fresh: 3–5 legs of random length (150–310 pt) and random gentle climb, every corner rounded, so the pig walks a different wave each time. It stops wherever the trip ends instead of walking home, and remembers that spot across relaunches.
 
+## Windows (10 / 11, 64-bit)
+
+Grab `PiggyPet-1.1.0-windows-x64.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest), unzip it anywhere and double-click `PiggyPet.exe`. Nothing else to install: Windows 10 1903+ and Windows 11 ship with the .NET Framework 4.8 this build targets.
+
+- The same 35 faces, the same generated strolls, the same Chinese right-click menu.
+- Cursor nudging uses `SetCursorPos` — no permission prompt, no synthetic clicks.
+- 开机自启 writes `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and can be switched off from the menu at any time.
+- The exe is unsigned, so SmartScreen may ask once: **更多信息 → 仍要运行**.
+- Settings live in `%APPDATA%\PiggyPet\settings.json`.
+
+`windows/README-Windows.txt` (inside the zip) is the Chinese quick start; [docs/WINDOWS.md](docs/WINDOWS.md) explains how the port maps onto Win32 and what has been verified.
+
 ## Download (macOS 13+)
 
-Grab `PiggyPet-1.0.1-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
+Grab `PiggyPet-1.1.0-universal.zip` from the [Releases page](https://github.com/Franky100-pig/PiggyPet/releases/latest). One zip works on both Apple Silicon and Intel Macs.
 
 1. Unzip and move `PiggyPet.app` to `/Applications` (optional).
 2. Remove the download quarantine flag — the app is ad-hoc signed, not notarized:
@@ -39,6 +51,8 @@ Check the download against the SHA-256 in `PiggyPet-<version>-checksums.txt`.
 
 ## Build & run
 
+macOS:
+
 ```bash
 ./scripts/build.sh     # produces build/PiggyPet.app
 ./scripts/run.sh       # builds and launches it
@@ -46,11 +60,23 @@ Check the download against the SHA-256 in `PiggyPet-<version>-checksums.txt`.
 
 Requires macOS 13+ and Xcode/Swift. Python 3 + Pillow are only needed to regenerate the sprite assets.
 
+Windows:
+
+```bash
+cd windows/PiggyPet.Windows
+dotnet build -c Release      # bin/Release/net48/PiggyPet.exe + assets
+dotnet run --project ../tests/PiggyPet.LogicTests   # stroll/manifest checks, runs on any OS
+```
+
+The .NET SDK 8 can cross-build the net48 exe from macOS or Linux, but the app itself needs Windows to run. GitHub Actions builds and packages it on `windows-latest` (`.github/workflows/windows.yml`).
+
 ## Project layout
 
-- `Sources/PiggyPet/` — Swift sources
-- `Resources/` — Info.plist template, manifest and processed sprites
+- `Sources/PiggyPet/` — Swift sources (macOS)
+- `windows/` — C# / WinForms sources, manifest of the Windows build, and the logic tests
+- `Resources/` — Info.plist template, manifest, icons and processed sprites shared by both builds
 - `scripts/` — build/run and asset preparation scripts
+- `docs/WINDOWS.md` — how the Windows port works and what was verified
 - `docs/assets-license.md` — asset provenance and licensing notes
 
 ## License
