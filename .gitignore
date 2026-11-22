@@ -5,3 +5,5 @@ assets/.source/
 __pycache__/
 .workbuddy/
 Resources/icon-1024.png
+windows/**/bin/
+windows/**/obj/

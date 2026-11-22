@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>PiggyPet.LogicTests</RootNamespace>
+    <AssemblyName>PiggyPet.LogicTests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The pure-logic half of the Windows app, compiled for the host so the
+         stroll maths can be checked without a Windows machine. -->
+    <Compile Include="..\..\PiggyPet.Windows\Core\Geometry.cs" Link="Core\Geometry.cs" />
+    <Compile Include="..\..\PiggyPet.Windows\Core\Json.cs" Link="Core\Json.cs" />
+    <Compile Include="..\..\PiggyPet.Windows\Core\Manifest.cs" Link="Core\Manifest.cs" />
+    <Compile Include="..\..\PiggyPet.Windows\Core\Settings.cs" Link="Core\Settings.cs" />
+    <Compile Include="..\..\PiggyPet.Windows\Core\StrollPlanner.cs" Link="Core\StrollPlanner.cs" />
+    <Compile Include="..\..\PiggyPet.Windows\Core\WalkPath.cs" Link="Core\WalkPath.cs" />
+  </ItemGroup>
+
+</Project>
