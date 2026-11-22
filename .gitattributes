@@ -1,0 +1,7 @@
+# GitHub's language bar is a plain byte count over the default branch, and the
+# Windows port is C# — 95 KB of it against 74 KB of Swift — so the repository
+# was being labelled a C# project even though the pet is a macOS app first.
+# Keeping windows/ out of the *statistics* (not out of the repo, search, blame
+# or diffs) leaves the label on Swift. Delete this file if you would rather
+# have the bar reflect raw bytes.
+windows/** linguist-detectable=false
