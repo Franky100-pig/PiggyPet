@@ -128,6 +128,9 @@ namespace PiggyPet
             var sprite = assets.Manifest.RandomExcept(window.CurrentSprite == null ? null : window.CurrentSprite.Id, random);
             window.ShowSprite(sprite);
             window.SetBubble(settings.BubbleEnabled ? sprite.Bubble : null);
+            // Same trap as the macOS build had: hiding the Zzz is not enough,
+            // the 1.6 s pulse would repaint a faint Zzz over the new face.
+            StopZzz();
             window.SetZzz(0f);
             state = State.Switching;
             ScheduleAwake(RandomRange(10f, 15f));
