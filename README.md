@@ -4,6 +4,34 @@ A tiny desktop pet for macOS and Windows: sleeps in the corner, turns into rando
 
 > **Status:** 1.1.0 — macOS and Windows, from one set of assets. Assets are sourced from the community PigHub-DB repository, which does **not** declare a license. They are included for local/personal use only — see [docs/assets-license.md](docs/assets-license.md).
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/poses.png" width="760" alt="Sleeping pig with a Zzz, the classic face, a close-up grin, and the burning angry pose">
+</p>
+
+<p align="center">
+  <sub>Asleep with the breathing Zzz &nbsp;·&nbsp; the face it starts with &nbsp;·&nbsp; what a tap switches to &nbsp;·&nbsp; 发怒</sub>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/motion.png" width="700" alt="Three frames of the walk cycle and three of the faster angry run">
+</p>
+
+<p align="center">
+  <sub>A generated stroll, sampled every 330 ms &nbsp;·&nbsp; then 快跑猪 during an angry chase</sub>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/bubble.png" width="190" alt="Speech bubble reading 别跑! above the pig">
+</p>
+
+<p align="center">
+  <sub>Chinese speech bubbles, toggled from the menu</sub>
+</p>
+
+These are window captures of the running app — only the pet's own layer, so no desktop, windows or wallpaper are in them. They come from the macOS build; the Windows port draws the same sprites with the same layout, but has not been screenshotted on a real Windows desktop yet.
+
 ## Highlights
 
 - Native on both sides — Swift / AppKit on macOS (~100 KB), C# / WinForms on Windows (~130 KB exe). No Electron, no Chromium.
