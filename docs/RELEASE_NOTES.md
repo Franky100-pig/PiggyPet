@@ -1,3 +1,24 @@
+# PiggyPet 1.1.1
+
+One fix on top of 1.1.0. Both builds are re-cut so the version numbers stay in
+step; nothing else about the pet changed.
+
+## What's fixed in 1.1.1
+
+- **The Zzz stops when you wake the pig.** Tapping cleared the Zzz but left the
+  sleep pulse's 1.6 s timer running, so it kept repainting a faint Zzz over
+  whatever expression the tap had just switched to — most visible when the new
+  face was a light one. The timer is now invalidated on wake, the way the drag,
+  stroll and chase paths already did it. Found while shooting the README
+  screenshots, where the leftover showed up on every awake pose.
+
+## Documentation
+
+- **Screenshots in the README.** Four poses, a six-frame walk/run strip and a
+  speech bubble. They are captured from the running app one window at a time
+  (`screencapture -l`), so the files contain only the pet's own layer — no
+  desktop, wallpaper or other windows.
+
 # PiggyPet 1.1.0
 
 PiggyPet runs on Windows now.
