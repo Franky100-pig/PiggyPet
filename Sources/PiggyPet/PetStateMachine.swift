@@ -48,6 +48,9 @@ final class PetStateMachine {
         let sprite = catalog.random(except: view?.currentSprite.id)
         view?.show(sprite)
         view?.setBubble(Preferences.bubbleEnabled ? sprite.bubble : nil)
+        // Tapping wakes the pig: the sleep pulse has to stop, or it keeps
+        // redrawing a faint Zzz over the face it just switched to.
+        zzzTimer?.invalidate()
         view?.setZzz(0)
         state = .switching
         // After a tap, go back to sleep if the user does nothing for 10-15 s.
